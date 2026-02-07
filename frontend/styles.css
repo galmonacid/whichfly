@@ -132,10 +132,6 @@ select {
   gap: 8px;
 }
 
-.hidden {
-  display: none;
-}
-
 .recommendation h3 {
   margin: 0 0 6px;
 }
@@ -163,6 +159,10 @@ select {
   flex-direction: column;
   gap: 6px;
   font-size: 0.95rem;
+}
+
+.hidden {
+  display: none;
 }
 
 .muted {

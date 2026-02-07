@@ -29,7 +29,7 @@ function setSuggestedRiver(name) {
 
 function formatValue(value, suffix = "") {
   if (value === null || value === undefined) {
-    return "No disponible";
+    return "Unavailable";
   }
   return `${value}${suffix}`;
 }
@@ -46,17 +46,19 @@ function renderContextPanel(contextUsed) {
 
   contextPanelEl.innerHTML = `
     <div><strong>Weather</strong></div>
-    <div>Temperatura: ${formatValue(weather.temperature_c, " °C")}</div>
-    <div>Precipitación: ${formatValue(weather.precipitation_mm, " mm")}</div>
-    <div>Nubosidad: ${formatValue(weather.cloud_cover_pct, " %")}</div>
-    <div>Viento: ${formatValue(weather.wind_speed_kph, " km/h")}</div>
+    <div>Temperature: ${formatValue(weather.temperature_c, " °C")}</div>
+    <div>Precipitation: ${formatValue(weather.precipitation_mm, " mm")}</div>
+    <div>Cloud cover: ${formatValue(weather.cloud_cover_pct, " %")}</div>
+    <div>Wind: ${formatValue(weather.wind_speed_kph, " km/h")}</div>
     <div><strong>Daylight</strong></div>
-    <div>Luz: ${daylight.is_daylight === null || daylight.is_daylight === undefined
-      ? "No disponible"
-      : daylight.is_daylight ? "Sí" : "No"}</div>
-    <div>Minutos al ocaso: ${formatValue(daylight.minutes_to_sunset)}</div>
+    <div>Daylight: ${daylight.is_daylight === null || daylight.is_daylight === undefined
+      ? "Unavailable"
+      : daylight.is_daylight ? "Yes" : "No"}</div>
+    <div>Minutes to sunset: ${formatValue(daylight.minutes_to_sunset)}</div>
   `;
 
+  contextPanelEl.classList.add("hidden");
+  toggleContextBtn.textContent = "Show context used";
   toggleContextBtn.classList.remove("hidden");
 }
 
@@ -163,6 +165,6 @@ button.addEventListener("click", fetchRecommendation);
 toggleContextBtn.addEventListener("click", () => {
   const isHidden = contextPanelEl.classList.contains("hidden");
   contextPanelEl.classList.toggle("hidden");
-  toggleContextBtn.textContent = isHidden ? "Ocultar contexto" : "Ver contexto usado";
+  toggleContextBtn.textContent = isHidden ? "Hide context" : "Show context used";
 });
 requestLocation();

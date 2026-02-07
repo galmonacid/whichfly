@@ -15,5 +15,5 @@ test("index.html includes Right now flow", async () => {
   assert.match(html, /Requesting location/i);
   assert.match(html, /Select river/i);
   assert.match(html, /Are fish rising/i);
-  assert.match(html, /Ver contexto usado/i);
+  assert.match(html, /Show context used/i);
 });
