@@ -1,0 +1,155 @@
+:root {
+  color-scheme: light;
+  font-family: "Source Serif 4", "Georgia", serif;
+  background: radial-gradient(circle at top, #f5f2ea 0%, #e5e1d6 55%, #d6d2c6 100%);
+  color: #2e2a24;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+.page {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 32px 20px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header h1 {
+  margin: 6px 0 10px;
+  font-size: clamp(2rem, 5vw, 2.6rem);
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.7rem;
+  color: #6b6256;
+  margin: 0;
+}
+
+.subhead {
+  margin: 0;
+  color: #4e473e;
+}
+
+.card {
+  background: #fdfbf6;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 12px 30px rgba(45, 39, 30, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.river {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-weight: 600;
+  margin: 0;
+}
+
+.river-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.secondary,
+.ghost {
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.secondary {
+  border: 1px solid #2f4b3d;
+  background: transparent;
+  color: #2f4b3d;
+}
+
+.ghost {
+  border: 1px solid transparent;
+  background: #efece4;
+  color: #4e473e;
+}
+
+.river-manual {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.small {
+  font-size: 0.85rem;
+}
+
+.hidden {
+  display: none;
+}
+
+select {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #c8c0b4;
+  background: #fff;
+  font-size: 1rem;
+}
+
+.primary {
+  padding: 12px;
+  border: none;
+  border-radius: 999px;
+  background: #2f4b3d;
+  color: #f9f7f0;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.primary:hover {
+  background: #3c5b4a;
+}
+
+.recommendation h3 {
+  margin: 0 0 6px;
+}
+
+.explanation {
+  margin: 6px 0 0;
+}
+
+.alternatives ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.muted {
+  color: #6b6256;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding: 24px 16px 36px;
+  }
+}

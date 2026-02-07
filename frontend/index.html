@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>whichFly – Right now</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="header">
+        <p class="eyebrow">whichFly</p>
+        <h1>Right now</h1>
+        <p class="subhead">Streamside fly choice for UK river trout.</p>
+      </header>
+
+      <section class="card" aria-label="Right now inputs">
+        <h2>Conditions</h2>
+        <div class="river">
+          <p class="label">River</p>
+          <div id="riverSuggestion" class="river-suggestion muted">
+            Requesting location…
+          </div>
+          <div id="riverActions" class="river-actions hidden">
+            <button id="confirmRiver" class="secondary">Confirm</button>
+            <button id="changeRiver" class="ghost">Change</button>
+          </div>
+          <div id="riverManual" class="river-manual hidden">
+            <label class="field">
+              <span>Select river</span>
+              <select id="riverSelect">
+                <option value="">Choose a river</option>
+                <option value="River Wye">River Wye</option>
+                <option value="River Test">River Test</option>
+                <option value="River Itchen">River Itchen</option>
+              </select>
+            </label>
+            <p class="muted small">TODO: Replace with real river list.</p>
+          </div>
+        </div>
+        <label class="field">
+          <span>Water level</span>
+          <select id="waterLevel">
+            <option value="normal">Normal</option>
+            <option value="low">Low</option>
+            <option value="high">High</option>
+          </select>
+        </label>
+        <button id="getRecommendation" class="primary">Get recommendation</button>
+      </section>
+
+      <section class="card" aria-live="polite" aria-label="Recommendation output">
+        <h2>Recommendation</h2>
+        <div id="recommendation" class="recommendation">
+          <p class="muted">Select water level and request a recommendation.</p>
+        </div>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

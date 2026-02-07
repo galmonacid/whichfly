@@ -1,0 +1,9 @@
+{
+  "name": "whichfly",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node backend/server.js",
+    "test": "node --test"
+  }
+}
