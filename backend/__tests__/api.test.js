@@ -41,15 +41,16 @@ test("POST /api/recommendation returns mocked payload", async () => {
     body: {
       waterLevel: "normal",
       riverName: "River Wye",
-      gps: { lat: 51.88, lon: -2.64, accuracy: 12 }
+      observations: { fishRising: true }
     }
   });
 
   assert.equal(response.statusCode, 200);
   const data = JSON.parse(response.body);
 
-  assert.equal(data.riverSuggestion, "River Wye (suggested)");
-  assert.equal(data.primaryFly.pattern, "Pheasant Tail");
+  assert.equal(data.river.name, "River Wye");
+  assert.equal(data.river.source, "user_selected");
+  assert.equal(data.primary.pattern, "Pheasant Tail Nymph");
   assert.ok(Array.isArray(data.alternatives));
 });
 
@@ -59,6 +60,19 @@ test("POST /api/recommendation rejects invalid payload", async () => {
     url: "/api/recommendation",
     method: "POST",
     body: { waterLevel: "fast" }
+  });
+
+  assert.equal(response.statusCode, 400);
+  const data = JSON.parse(response.body);
+  assert.equal(data.error, "Invalid request");
+});
+
+test("POST /api/recommendation rejects empty body", async () => {
+  const server = createServer();
+  const response = await request(server, {
+    url: "/api/recommendation",
+    method: "POST",
+    body: null
   });
 
   assert.equal(response.statusCode, 400);

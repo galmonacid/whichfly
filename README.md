@@ -52,3 +52,8 @@ If it cannot be used quickly at the river, it does not belong in the MVP.
 - `PORT`: HTTP port for the dev server (default `3000`)
 - `WEATHER_API_BASE_URL`: Placeholder for weather API base URL
 - `DAYLIGHT_API_BASE_URL`: Placeholder for daylight API base URL
+- `OPENAI_API_KEY`: OpenAI API key (required for LLM-first recommendations)
+- `OPENAI_MODEL`: OpenAI model name (default `gpt-4o-mini`)
+
+### Local env file (optional)
+Create a `.env.local` in the project root to set environment variables for local dev.

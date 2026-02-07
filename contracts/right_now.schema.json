@@ -4,17 +4,17 @@
   "title": "RightNowResponse",
   "type": "object",
   "additionalProperties": false,
-  "required": ["river", "primary", "alternatives", "explanation", "confidence", "confidence_reasons", "meta"],
+  "required": ["river", "primary", "alternatives", "explanation", "confidence", "confidence_reasons", "context_used", "meta"],
   "properties": {
     "river": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["name", "source", "confidence"],
+      "required": ["name", "source", "confidence", "distance_m"],
       "properties": {
         "name": { "type": "string", "minLength": 1, "maxLength": 80 },
         "source": { "type": "string", "enum": ["gps_suggested", "user_selected", "unknown"] },
         "confidence": { "type": "string", "enum": ["high", "medium", "low"] },
-        "distance_m": { "type": "number", "minimum": 0, "maximum": 20000 }
+        "distance_m": { "type": ["number", "null"], "minimum": 0, "maximum": 20000 }
       }
     },
     "primary": {
@@ -43,10 +43,37 @@
       "maxItems": 6,
       "items": { "type": "string", "minLength": 3, "maxLength": 120 }
     },
+    "context_used": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["weather", "daylight"],
+      "properties": {
+        "weather": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["temperature_c", "precipitation_mm", "cloud_cover_pct", "wind_speed_kph"],
+          "properties": {
+            "temperature_c": { "type": ["number", "null"] },
+            "precipitation_mm": { "type": ["number", "null"] },
+            "cloud_cover_pct": { "type": ["number", "null"] },
+            "wind_speed_kph": { "type": ["number", "null"] }
+          }
+        },
+        "daylight": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["is_daylight", "minutes_to_sunset"],
+          "properties": {
+            "is_daylight": { "type": ["boolean", "null"] },
+            "minutes_to_sunset": { "type": ["number", "null"] }
+          }
+        }
+      }
+    },
     "meta": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["version", "mode"],
+      "required": ["version", "mode", "generated_at"],
       "properties": {
         "version": { "type": "string", "minLength": 1, "maxLength": 20 },
         "mode": { "type": "string", "enum": ["right_now", "planning"] },
@@ -74,21 +101,23 @@
       }
     },
     "conditional_fly_pick": {
-      "allOf": [
-        { "$ref": "#/$defs/fly_pick" },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["when"],
-          "properties": {
-            "when": {
-              "type": "string",
-              "minLength": 10,
-              "maxLength": 120
-            }
-          }
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pattern", "type", "size", "when"],
+      "properties": {
+        "pattern": { "type": "string", "minLength": 2, "maxLength": 60 },
+        "type": { "$ref": "#/$defs/fly_type" },
+        "size": {
+          "type": "integer",
+          "minimum": 6,
+          "maximum": 24
+        },
+        "when": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 120
         }
-      ]
+      }
     }
   }
 }

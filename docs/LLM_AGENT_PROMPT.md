@@ -23,6 +23,7 @@ Output constraints:
 - alternatives: max 2
 - explanation: 20–360 characters, practical and concise
 - confidence_reasons: 1–6 short bullet-like strings
+- include `context_used` echoed from the input context
 
 ---
 

@@ -46,6 +46,19 @@
             <option value="high">High</option>
           </select>
         </label>
+        <div id="confidenceGate" class="confidence hidden">
+          <p class="muted">
+            Low confidence. If you can, add one quick observation to improve the call.
+          </p>
+          <label class="field">
+            <span>Are fish rising?</span>
+            <select id="fishRising">
+              <option value="unknown">Not sure</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </label>
+        </div>
         <button id="getRecommendation" class="primary">Get recommendation</button>
       </section>
 
@@ -54,6 +67,8 @@
         <div id="recommendation" class="recommendation">
           <p class="muted">Select water level and request a recommendation.</p>
         </div>
+        <button id="toggleContext" class="ghost hidden" type="button">Ver contexto usado</button>
+        <div id="contextPanel" class="context-panel hidden" aria-live="polite"></div>
       </section>
     </main>
     <script src="/app.js"></script>

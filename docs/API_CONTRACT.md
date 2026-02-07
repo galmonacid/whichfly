@@ -3,23 +3,23 @@
 This document describes request/response structures for whichFly MVP.
 
 ## Endpoint (MVP)
-- `POST /api/right-now`
+- `POST /api/recommendation`
 
-## Request (suggested)
-- `lat` (optional)
-- `lon` (optional)
-- `accuracy_m` (optional)
-- `water_level`: Low | Normal | High
-- `river_override` (optional): string
-- `mode`: right_now | planning (planning may be unused initially)
+## Request
+- `gps` (optional): `{ lat, lon, accuracy? }`
+- `waterLevel`: `low | normal | high`
+- `riverName` (optional): string (user-selected river)
+- `observations` (optional):
+  - `fishRising`: boolean | null
 
 ## Response
 The response MUST validate against:
 - `contracts/right_now.schema.json`
 
 Key fields:
-- `river`: suggestion and confidence
+- `river`: suggestion and confidence (see schema)
 - `primary`: main fly choice (pattern/type/size)
 - `alternatives`: max 2 conditional alternatives
 - `explanation`: concise, practical
 - `confidence` + `confidence_reasons`
+- `meta`: version and mode

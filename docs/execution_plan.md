@@ -53,13 +53,13 @@
     ## [DONE] 1.1 Choose minimal stack and create skeleton
     **Goal:** Bootable app with one page + one API endpoint returning mocked JSON.
     - Frontend: mobile-first single screen
-    - Backend: /api/right-now returns hardcoded response
+- Backend: /api/recommendation returns hardcoded response
     - No DB, no auth
 
     **Task prompt**
     ```text
     Read PRODUCT.md, MVP.md, ARCHITECTURE.md, and AGENTIC_DEVELOPMENT.md.
-    Create a minimal project skeleton: frontend + backend API (/api/right-now) returning mocked JSON.
+Create a minimal project skeleton: frontend + backend API (/api/recommendation) returning mocked JSON.
     No auth, no DB. Add simple run instructions to README.
     Add minimal tests (at least one backend test).
     Provide file tree, key file contents, and commands to run locally.
@@ -84,7 +84,7 @@
 
     **Task prompt**
     ```text
-    Implement a typed API contract and input validation for /api/right-now.
+Implement a typed API contract and input validation for /api/recommendation.
     Define TypeScript types (or JSON schema if preferred) for request/response.
     Update mocked response to conform. Add tests for validation errors.
     Keep changes minimal. Provide Change Summary with tests.
@@ -100,7 +100,7 @@
     ```text
     Implement the minimal Right now UI:
     - water level selector (Low/Normal/High)
-    - call /api/right-now
+- call /api/recommendation
     - render response fields clearly on mobile
     No geolocation yet.
     Add at least one basic frontend smoke test if feasible.
@@ -109,7 +109,7 @@
 
     ---
 
-    # [] Phase 2 — GPS & River Suggestion UX (without real river inference)
+    # [DONE] Phase 2 — GPS & River Suggestion UX (without real river inference)
 
     ## [DONE] 2.1 Add geolocation capture on the client
     **Goal:** Get lat/lon + accuracy and send to backend.
@@ -120,12 +120,12 @@
     **Task prompt**
     ```text
     Add device geolocation capture (lat/lon/accuracy) to the Right now UI.
-    Send these fields to /api/right-now when available.
+Send these fields to /api/recommendation when available.
     If denied/unavailable, proceed without location and show manual river selection placeholder.
     Keep changes minimal. Provide Change Summary with tests.
     ```
 
-    ## [DONE] 2.2 Add “Suggested river” confirmation UX
+[DONE] 2.2 Add “Suggested river” confirmation UX
     **Goal:** “Suggested river: X” with Confirm/Change even if backend is still mock.
     - UI always allows correction
     - If user taps Change → show manual selector and send riverOverride
@@ -142,9 +142,9 @@
 
     ---
 
-    # [] Phase 3 — Context Enrichment (Weather + Daylight)
+[DONE] Phase 3 — Context Enrichment (Weather + Daylight)
 
-    ## [] 3.1 Integrate Open-Meteo (backend)
+[DONE] 3.1 Integrate Open-Meteo (backend)
     **Goal:** Enrich internal agent input with current weather using lat/lon.
     - Timeouts
     - Error handling
@@ -161,7 +161,7 @@
     Provide Change Summary with tests and rollback notes.
     ```
 
-    ## [] 3.2 Integrate daylight (sunrise/sunset) (backend)
+[DONE] 3.2 Integrate daylight (sunrise/sunset) (backend)
     **Goal:** Add daylight context (sunrise, sunset, daylight remaining).
     - Use a simple sunrise/sunset API
     - Same reliability standards as weather
@@ -179,7 +179,7 @@
 
     # [] Phase 4 — River Inference (MVP-quality, simple)
 
-    ## [] 4.1 Start with a curated river list (fast path)
+[DONE] 4.1 Start with a curated river list (fast path)
     **Goal:** Ship something usable before full GIS.
     - Add data/uk_rivers_min.json with ~50 trout rivers + representative coords
     - Backend selects nearest by haversine distance
@@ -195,7 +195,7 @@
     Provide Change Summary with tests and rollback notes.
     ```
 
-    ## [] 4.2 Improve disambiguation using GPS accuracy
+[DONE] 4.2 Improve disambiguation using GPS accuracy
     **Goal:** Use accuracy to adjust thresholds.
     - If accuracy is poor, lower confidence or widen threshold but require confirmation
 
@@ -212,80 +212,52 @@
 
     ---
 
-    # [] Phase 5 — LLM Contract & Guardrails
+# [] Phase 5 — LLM Contract & Guardrails
 
-    ## [] 5.1 Add LLM response contract (schema)
+[DONE] 5.1 Add LLM response contract (schema)
+**Goal:** Make LLM output machine-safe.
+- Add contracts/right_now.schema.json
+- Enforce strict JSON validation
+- Backend rejects invalid output
 
-Goal: Make LLM output machine-safe.
+[DONE] 5.2 Add fly pattern allowlist
+**Goal:** Prevent hallucinated or obscure recommendations.
+- Add docs/FLY_ALLOWLIST.md
+- Backend enforces allowlist
+- Tests for allowlist violations
 
-Add contracts/right_now.schema.json
+[DONE] 5.3 Implement LLM guardrails & retry logic
+**Goal:** Make LLM failure non-fatal.
+- JSON-only output
+- One retry with correction message
+- Hard fallback on second failure
+- Forbidden phrases filter (“hatch is on”, local claims)
 
-Enforce strict JSON validation
+[Done] 5.4 Implement conservative fallback recommender
+**Goal:** Always return something fishable.
+- Single safe recommendation
+- Uses allowlist
+- No LLM
 
-Backend rejects invalid output
+---
 
+# [] Phase 6 — LLM-first Recommendation Engine
 
-    ## [] 5.2 Add fly pattern allowlist
+[DONE] 6.1 Implement LLM-first recommendation engine
+**Goal:** LLM produces the recommendation, within guardrails.
+- LLM enabled by default
+- Uses canonical prompt
+- Must comply with schema + allowlist
+- Confidence returned by model
+- Backend enforces confidence gating
 
-Goal: Prevent hallucinated or obscure recommendations.
+[DONE] 6.2 Add LLM confidence gating UX
+**Goal:** Be honest when certainty is low.
+- If confidence = low:
+- Show disclaimer
+- Or ask 1 optional observation (“fish rising?”)
 
-Add docs/FLY_ALLOWLIST.md
-
-Backend enforces allowlist
-
-Tests for allowlist violations
-
-5.3 Implement LLM guardrails & retry logic
-
-Goal: Make LLM failure non-fatal.
-
-JSON-only output
-
-One retry with correction message
-
-Hard fallback on second failure
-
-Forbidden phrases filter (“hatch is on”, local claims)
-
-5.4 Implement conservative fallback recommender
-
-Goal: Always return something fishable.
-
-Single safe recommendation
-
-Uses allowlist
-
-No LLM
-
-    ---
-
-    # [] Phase 6 — LLM-first Recommendation Engine
-
-    ## [] 6.1 Implement LLM-first recommendation engine
-
-Goal: LLM produces the recommendation, within guardrails.
-
-LLM enabled by default
-
-Uses canonical prompt
-
-Must comply with schema + allowlist
-
-Confidence returned by model
-
-Backend enforces confidence gating
-
-6.2 Add LLM confidence gating UX
-
-Goal: Be honest when certainty is low.
-
-If confidence = low:
-
-Show disclaimer
-
-Or ask 1 optional observation (“fish rising?”)
-
-    ---
+---
 
     # [] Phase 7 — Planning Mode (Secondary)
 

@@ -99,10 +99,6 @@ body {
   font-size: 0.85rem;
 }
 
-.hidden {
-  display: none;
-}
-
 select {
   padding: 10px 12px;
   border-radius: 10px;
@@ -126,6 +122,20 @@ select {
   background: #3c5b4a;
 }
 
+.confidence {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f2ede3;
+  border: 1px dashed #c8c0b4;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hidden {
+  display: none;
+}
+
 .recommendation h3 {
   margin: 0 0 6px;
 }
@@ -141,6 +151,18 @@ select {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.context-panel {
+  margin-top: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #f8f5ee;
+  border: 1px solid #e0d8cb;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.95rem;
 }
 
 .muted {
