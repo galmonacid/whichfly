@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { callOpenAiResponses } from "../llm_client.js";
+import { buildRuntimePrompt, callOpenAiResponses } from "../llm_client.js";
 
 function mockFetch(payload) {
   return async () => ({
@@ -34,4 +34,26 @@ test("callOpenAiResponses extracts output_text", async () => {
   });
 
   assert.equal(text, "{\"ok\":true}");
+});
+
+test("buildRuntimePrompt caps grounding_snippets and omits allowlist", () => {
+  const prompt = buildRuntimePrompt({
+    river: { name: "River Wye" },
+    inputs: { water_level: "Normal" },
+    context: { weather: {}, daylight: {} },
+    groundingSnippets: [
+      { id: "1" },
+      { id: "2" },
+      { id: "3" },
+      { id: "4" },
+      { id: "5" },
+      { id: "6" }
+    ],
+    mode: "right_now"
+  });
+
+  assert.equal(prompt.mode, "right_now");
+  assert.ok(Array.isArray(prompt.grounding_snippets));
+  assert.equal(prompt.grounding_snippets.length, 5);
+  assert.equal("allowlist" in prompt, false);
 });

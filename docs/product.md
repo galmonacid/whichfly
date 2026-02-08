@@ -18,7 +18,7 @@ whichFly is a **streamside decision-support tool**.
 
 ---
 
-## Primary usage mode: Right now
+## Primary usage mode: By the riverside (Right now)
 
 - User is physically at the river
 - Date and time are implicit (now)
@@ -33,6 +33,14 @@ whichFly is a **streamside decision-support tool**.
 - Explicit river
 - Used before the trip
 - Not the primary design target
+
+---
+
+## River coverage (MVP)
+
+- UK-wide river dataset with representative coordinates
+- Long rivers are split into coarse reaches to avoid "one point per river" errors
+- Users still confirm the river; reaches are contextual, not precise tramos
 
 ---
 

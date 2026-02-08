@@ -54,6 +54,17 @@ If it cannot be used quickly at the river, it does not belong in the MVP.
 - `DAYLIGHT_API_BASE_URL`: Placeholder for daylight API base URL
 - `OPENAI_API_KEY`: OpenAI API key (required for LLM-first recommendations)
 - `OPENAI_MODEL`: OpenAI model name (default `gpt-4o-mini`)
+- `ALLOWLIST_ENFORCEMENT`: Set to `true` to enforce fly allowlist validation (default `false`)
 
 ### Local env file (optional)
 Create a `.env.local` in the project root to set environment variables for local dev.
+
+---
+
+## Data sources & attribution
+
+This project uses public river datasets to build the local river index. Attribution text must be
+confirmed against the source license terms before release.
+
+- OS Open Rivers (Great Britain). TODO: Insert the required attribution text from OS.
+- Rivers Digital Datasets (Northern Ireland). TODO: Insert the required attribution text from DAERA/NI.

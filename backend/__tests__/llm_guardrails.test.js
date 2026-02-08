@@ -48,6 +48,50 @@ function makeValidResponse() {
   });
 }
 
+function makeAllowlistViolationResponse() {
+  return JSON.stringify({
+    river: {
+      name: "River Wye",
+      source: "gps_suggested",
+      confidence: "medium",
+      distance_m: 12000
+    },
+    primary: {
+      pattern: "MagicMayfly9000",
+      type: "dry",
+      size: 14
+    },
+    alternatives: [
+      {
+        when: "If you see surface activity",
+        pattern: "Elk Hair Caddis",
+        type: "dry",
+        size: 14
+      }
+    ],
+    explanation: "A reliable dry covers most UK river trout in mixed conditions.",
+    confidence: "medium",
+    confidence_reasons: ["Generic river suggestion only"],
+    context_used: {
+      weather: {
+        temperature_c: null,
+        precipitation_mm: null,
+        cloud_cover_pct: null,
+        wind_speed_kph: null
+      },
+      daylight: {
+        is_daylight: null,
+        minutes_to_sunset: null
+      }
+    },
+    meta: {
+      version: "0.1",
+      mode: "right_now",
+      generated_at: "2025-06-01T12:00:00.000Z"
+    }
+  });
+}
+
 test("runLlmWithGuardrails retries on non-JSON and succeeds", async () => {
   const calls = [];
   const callLlm = async (prompt) => {
@@ -76,6 +120,62 @@ test("runLlmWithGuardrails retries on non-JSON and succeeds", async () => {
   assert.equal(result.ok, true);
   assert.equal(result.retried, true);
   assert.ok(calls[1].includes(FORMAT_CORRECTION_MESSAGE));
+});
+
+test("runLlmWithGuardrails falls back on allowlist violation and logs it", async () => {
+  const events = [];
+  const callLlm = async () => makeAllowlistViolationResponse();
+
+  const result = await runLlmWithGuardrails({
+    prompt: "base prompt",
+    callLlm,
+    allowlist,
+    logger: (event, meta) => events.push({ event, meta }),
+    contextUsed: {
+      weather: {
+        temperature_c: null,
+        precipitation_mm: null,
+        cloud_cover_pct: null,
+        wind_speed_kph: null
+      },
+      daylight: {
+        is_daylight: null,
+        minutes_to_sunset: null
+      }
+    }
+  });
+
+  assert.equal(result.ok, false);
+  assert.equal(result.response.primary.pattern, "Pheasant Tail Nymph");
+  assert.ok(events.some((entry) => entry.event === "allowlist_violation"));
+  assert.ok(events.some((entry) => entry.event === "retry_triggered"));
+  assert.ok(events.some((entry) => entry.event === "fallback_used"));
+});
+
+test("runLlmWithGuardrails allows non-allowlisted patterns when enforcement is off", async () => {
+  const callLlm = async () => makeAllowlistViolationResponse();
+
+  const result = await runLlmWithGuardrails({
+    prompt: "base prompt",
+    callLlm,
+    allowlist,
+    enforceAllowlist: false,
+    contextUsed: {
+      weather: {
+        temperature_c: null,
+        precipitation_mm: null,
+        cloud_cover_pct: null,
+        wind_speed_kph: null
+      },
+      daylight: {
+        is_daylight: null,
+        minutes_to_sunset: null
+      }
+    }
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.response.primary.pattern, "MagicMayfly9000");
 });
 
 test("runLlmWithGuardrails falls back after forbidden phrase", async () => {
@@ -125,6 +225,53 @@ test("runLlmWithGuardrails falls back after forbidden phrase", async () => {
   assert.equal(result.ok, false);
   assert.equal(result.response.primary.pattern, "Pheasant Tail Nymph");
   assert.deepEqual(result.response.alternatives, []);
+});
+
+test("runLlmWithGuardrails rejects source-like claims", async () => {
+  const callLlm = async () => {
+    return JSON.stringify({
+      river: { name: "River Wye", source: "gps_suggested", confidence: "medium", distance_m: 12000 },
+      primary: { pattern: "Pheasant Tail Nymph", type: "nymph", size: 16 },
+      alternatives: [],
+      explanation: "Anglers report strong rises so dries are a sure bet today.",
+      confidence: "medium",
+      confidence_reasons: ["Test"],
+      context_used: {
+        weather: {
+          temperature_c: null,
+          precipitation_mm: null,
+          cloud_cover_pct: null,
+          wind_speed_kph: null
+        },
+        daylight: {
+          is_daylight: null,
+          minutes_to_sunset: null
+        }
+      },
+      meta: { version: "0.1", mode: "right_now", generated_at: "2025-06-01T12:00:00.000Z" }
+    });
+  };
+
+  const result = await runLlmWithGuardrails({
+    prompt: "base prompt",
+    callLlm,
+    allowlist,
+    contextUsed: {
+      weather: {
+        temperature_c: null,
+        precipitation_mm: null,
+        cloud_cover_pct: null,
+        wind_speed_kph: null
+      },
+      daylight: {
+        is_daylight: null,
+        minutes_to_sunset: null
+      }
+    }
+  });
+
+  assert.equal(result.ok, false);
+  assert.equal(result.response.primary.pattern, "Pheasant Tail Nymph");
 });
 
 test("buildFallbackResponse returns schema-safe payload", () => {

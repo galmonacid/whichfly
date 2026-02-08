@@ -20,6 +20,10 @@
 - Enriches context (weather, daylight)
 - Orchestrates AI agent execution
 
+### River dataset & preprocessing
+- Offline build step ingests GB + NI river data
+- Produces reach-level points for context and suggestion
+
 ### AI Agent
 - Applies fishing heuristics
 - Reasons over current conditions
@@ -30,8 +34,9 @@
 ## Data flow
 
 Device location  
+→ Nearest reach lookup  
 → River suggestion  
-→ Context enrichment (weather, daylight)  
+→ Context enrichment (weather, daylight from reach coords)  
 → AI agent reasoning  
 → Structured response  
 → UI rendering

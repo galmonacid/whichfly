@@ -38,16 +38,19 @@ export function loadResponseSchema() {
   return schema;
 }
 
-export function buildRuntimePrompt({ river, inputs, context, allowlist }) {
-  return {
-    mode: "right_now",
+export function buildRuntimePrompt({ river, inputs, context, groundingSnippets, mode }) {
+  const prompt = {
+    mode: mode || "right_now",
     river,
     inputs,
-    context,
-    allowlist: {
-      patterns: Array.from(allowlist)
-    }
+    context
   };
+
+  if (Array.isArray(groundingSnippets) && groundingSnippets.length > 0) {
+    prompt.grounding_snippets = groundingSnippets.slice(0, 5);
+  }
+
+  return prompt;
 }
 
 function extractOutputText(responsePayload) {

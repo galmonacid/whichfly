@@ -1,0 +1,194 @@
+[
+  {
+    "id": "uk_general_start_subsurface_when_uncertain",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["chalkstream", "freestone", "mixed", "unknown"],
+      "season": ["spring", "summer", "autumn", "winter"]
+    },
+    "kind": "general_guidance",
+    "summary": "When conditions are unclear or there is no visible surface activity, starting with a subsurface approach is widely considered a reliable baseline on UK rivers.",
+    "confidence": "medium",
+    "tags": ["baseline", "subsurface", "uncertainty"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "book", "ref": "Oliver Edwards – Fly Fishing on Rivers" },
+      { "type": "guide", "ref": "UK river fishing general practice" }
+    ],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_general_switch_on_visible_rises",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["chalkstream", "freestone", "mixed"],
+      "season": ["spring", "summer", "autumn"]
+    },
+    "kind": "general_guidance",
+    "summary": "Consistent surface rises are commonly treated as the primary signal to switch from subsurface tactics to dry flies or emergers.",
+    "confidence": "medium",
+    "tags": ["surface-activity", "rises", "switching"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "book", "ref": "Charles Jardine – Fly Fishing in Practice" }
+    ],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_general_high_water_edges_and_weight",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["freestone", "mixed", "unknown"],
+      "season": ["spring", "autumn", "winter"]
+    },
+    "kind": "general_guidance",
+    "summary": "During higher flows, anglers often focus on slower edges and inside seams, using subsurface flies that can maintain depth and drift control.",
+    "confidence": "medium",
+    "tags": ["high-water", "edges", "drift", "subsurface"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "guide", "ref": "UK spate river fishing practice" }
+    ],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_general_low_clear_water_go_subtle",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["chalkstream", "mixed"],
+      "season": ["summer"]
+    },
+    "kind": "general_guidance",
+    "summary": "In low, clear water, subtle presentations, smaller patterns, and careful approach are commonly preferred over frequent fly changes.",
+    "confidence": "medium",
+    "tags": ["low-water", "clear-water", "presentation", "stealth"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "book", "ref": "Oliver Edwards – Essential Skills" }
+    ],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_general_wind_reduces_surface_reliability",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["freestone", "mixed", "unknown"],
+      "season": ["spring", "summer", "autumn"]
+    },
+    "kind": "general_guidance",
+    "summary": "Strong or gusty wind can make dry-fly presentation difficult on rivers; in such conditions, subsurface methods are often considered more forgiving.",
+    "confidence": "low",
+    "tags": ["wind", "presentation", "subsurface"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "guide", "ref": "UK river fly fishing general advice" }
+    ],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_general_evening_last_light_opportunity",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["chalkstream", "mixed"],
+      "season": ["spring", "summer"]
+    },
+    "kind": "angler_reports",
+    "summary": "Many anglers report increased surface activity toward last light on milder evenings, making it a common time to reassess dry-fly options if fish begin rising.",
+    "confidence": "low",
+    "tags": ["evening", "last-light", "surface-activity"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "book", "ref": "Charles Jardine – River Trout Fishing" },
+      { "type": "forum", "ref": "aggregated UK angler reports" }
+    ],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_general_chalkstream_precision_over_pattern",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["chalkstream"],
+      "season": ["spring", "summer", "autumn"]
+    },
+    "kind": "river_type_guidance",
+    "summary": "On chalkstreams, precision, drift quality, and positioning are often considered at least as important as exact fly pattern choice.",
+    "confidence": "medium",
+    "tags": ["chalkstream", "presentation", "drift"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "book", "ref": "Oliver Edwards – Chalkstream Fishing" }
+    ],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_general_freestone_reading_water",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["freestone"],
+      "season": ["spring", "summer", "autumn", "winter"]
+    },
+    "kind": "river_type_guidance",
+    "summary": "On freestone rivers, success is often linked to reading water effectively and adapting depth and drift rather than relying on a single fly choice.",
+    "confidence": "medium",
+    "tags": ["freestone", "water-reading", "adaptation"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "guide", "ref": "UK upland river fishing practice" }
+    ],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_general_no_surface_activity_stay_subsurface",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["chalkstream", "freestone", "mixed"],
+      "season": ["spring", "summer", "autumn", "winter"]
+    },
+    "kind": "general_guidance",
+    "summary": "When there is little or no consistent surface feeding, persisting with a subsurface approach is commonly advised rather than forcing dry flies.",
+    "confidence": "medium",
+    "tags": ["no-risers", "subsurface", "patience"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "guide", "ref": "General UK river trout fishing consensus" }
+    ],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_general_conservative_when_context_unknown",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["unknown"],
+      "season": ["unknown"]
+    },
+    "kind": "safety_note",
+    "summary": "When river type, conditions, or local context are uncertain, conservative and broadly applicable choices are generally preferred over specific local tactics.",
+    "confidence": "high",
+    "tags": ["safety", "uncertainty", "conservative"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "guide", "ref": "whichFly safety principle" }
+    ],
+    "created_at": "2026-02-08"
+  }
+]

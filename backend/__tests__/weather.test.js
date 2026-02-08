@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { fetchWeather } from "../weather.js";
+import { fetchWeather, fetchWeatherForecast } from "../weather.js";
 
 function mockFetchOk(body) {
   return async () => ({
@@ -56,4 +56,25 @@ test("fetchWeather returns null on timeout", async () => {
     timeoutMs: 5
   });
   assert.equal(weather, null);
+});
+
+test("fetchWeatherForecast returns daily summary", async () => {
+  const fetchImpl = mockFetchOk({
+    daily: {
+      time: ["2026-02-10"],
+      temperature_2m_max: [8],
+      temperature_2m_min: [2],
+      precipitation_sum: [1.2],
+      cloud_cover_mean: [60],
+      wind_speed_10m_max: [18]
+    }
+  });
+
+  const weather = await fetchWeatherForecast(51.88, -2.64, "2026-02-10", { fetchImpl });
+  assert.deepEqual(weather, {
+    temperature: 5,
+    precipitation: 1.2,
+    cloudCover: 60,
+    windSpeed: 18
+  });
 });

@@ -17,7 +17,9 @@ Answer the question:
 ## Inputs
 
 - Approximate river context (GPS-suggested or user-selected)
+- River reach/region (coarse, when available)
 - Date (implicit = today, unless planning mode)
+- Season (derived from date)
 - Current weather
 - Current daylight
 - Water level (Low / Normal / High)

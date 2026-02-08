@@ -4,6 +4,7 @@
 - Core “Right now” recommendation flow
 - GPS-based river suggestion
 - UK rivers – trout
+- Full UK river dataset with reach-level points for context (GB + NI)
 - Web-only
 
 ---
@@ -13,6 +14,7 @@
 - Water level automation (selected rivers)
 - Feedback loop (“Did it work?”)
 - Seasonal passes / monetisation
+- Finer reach/beat selection (if needed)
 
 ---
 

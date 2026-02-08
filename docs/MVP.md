@@ -6,14 +6,16 @@
 - UK rivers only
 - Trout species only
 - Primary mode: Right now (streamside)
+- UK-wide river dataset with reach-level representative points for context (GB + NI)
 
 ---
 
 ## Inputs
 
-### Right now (default)
+### By the riverside (Right now, default)
 - Device location (GPS, optional)
 - Water level (manual: Low / Normal / High)
+- Optional observation: fish rising (Yes / No / Not sure)
 
 ### Planning mode (secondary)
 - Date
@@ -26,6 +28,7 @@
 - Current weather
 - Current daylight
 - Season inferred from date
+- River reach context (coarse, derived from dataset)
 
 ---
 
@@ -39,7 +42,7 @@
 
 ## Explicitly out of scope
 
-- Exact river tramo detection
+- Exact river tramo / beat detection
 - Multi-day forecasts
 - User accounts
 - Payments

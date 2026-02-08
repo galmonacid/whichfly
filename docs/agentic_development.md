@@ -59,6 +59,7 @@ High-risk areas include:
 - User-facing recommendation logic
 - AI prompts or reasoning
 - External API usage
+- External datasets or licensing changes
 - Anything affecting “Right now” UX
 
 Risky changes require:
@@ -97,6 +98,7 @@ For any prod-affecting change, document:
 - No secrets in the repo
 - Config documented separately
 - Prefer mocks/emulators for local dev
+- Data sources must be documented with attribution and update cadence
 
 ---
 

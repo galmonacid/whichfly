@@ -1,0 +1,63 @@
+[
+  {
+    "river_id": "river-wye",
+    "river_name": "River Wye",
+    "reach_id": "river-wye-1",
+    "reach_label": "reach_1_of_3",
+    "reach_rank": 1,
+    "lat": 52.72,
+    "lon": -3.47,
+    "source": "sample"
+  },
+  {
+    "river_id": "river-wye",
+    "river_name": "River Wye",
+    "reach_id": "river-wye-2",
+    "reach_label": "reach_2_of_3",
+    "reach_rank": 2,
+    "lat": 52.23,
+    "lon": -3.02,
+    "source": "sample"
+  },
+  {
+    "river_id": "river-wye",
+    "river_name": "River Wye",
+    "reach_id": "river-wye-3",
+    "reach_label": "reach_3_of_3",
+    "reach_rank": 3,
+    "lat": 51.90,
+    "lon": -2.71,
+    "source": "sample"
+  },
+  {
+    "river_id": "river-bann",
+    "river_name": "River Bann",
+    "reach_id": "river-bann-1",
+    "reach_label": "single",
+    "reach_rank": 1,
+    "lat": 54.87,
+    "lon": -6.46,
+    "source": "sample_ni"
+  },
+  {
+    "river_id": "river-usk",
+    "river_name": "River Usk",
+    "river_name_alt": "Afon Wysg",
+    "reach_id": "river-usk-1",
+    "reach_label": "single",
+    "reach_rank": 1,
+    "lat": 51.88,
+    "lon": -3.02,
+    "source": "sample"
+  },
+  {
+    "river_id": "river-test",
+    "river_name": "River Test",
+    "reach_id": "river-test-1",
+    "reach_label": "single",
+    "reach_rank": 1,
+    "lat": 51.16,
+    "lon": -1.49,
+    "source": "sample"
+  }
+]

@@ -1,0 +1,112 @@
+[
+  {
+    "id": "uk_south_spring_start_subsurface",
+    "scope": { "country": "UK", "region": "south", "river": null, "river_type": ["chalkstream", "mixed"], "season": ["spring"] },
+    "kind": "general_guidance",
+    "summary": "In early spring conditions, starting subsurface is often a safe approach; switch to a dry only when you see consistent surface feeding.",
+    "confidence": "low",
+    "tags": ["spring", "start", "subsurface", "surface-activity"],
+    "use_as": "background_only",
+    "sources": [{ "type": "internal_note", "ref": "internal_note_uk_south_001" }],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_south_overcast_dries_later",
+    "scope": { "country": "UK", "region": "south", "river": null, "river_type": ["chalkstream", "mixed"], "season": ["spring", "summer"] },
+    "kind": "angler_reports",
+    "summary": "Anglers often report improved surface activity later in the day during milder, overcast conditions; keep a dry option ready but don’t force it early.",
+    "confidence": "low",
+    "tags": ["overcast", "timing", "dry", "surface-activity"],
+    "use_as": "background_only",
+    "sources": [{ "type": "internal_note", "ref": "internal_note_uk_south_002" }],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_south_high_water_heavier_nymph",
+    "scope": { "country": "UK", "region": "south", "river": null, "river_type": ["mixed", "unknown"], "season": ["spring", "autumn", "winter"] },
+    "kind": "general_guidance",
+    "summary": "When flows are higher, subsurface tactics can be more consistent; consider slightly heavier nymph presentations and focus on slower edges.",
+    "confidence": "low",
+    "tags": ["high-water", "nymph", "edges", "presentation"],
+    "use_as": "background_only",
+    "sources": [{ "type": "internal_note", "ref": "internal_note_uk_south_003" }],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_south_low_clear_water_go_smaller",
+    "scope": { "country": "UK", "region": "south", "river": null, "river_type": ["chalkstream", "mixed"], "season": ["summer"] },
+    "kind": "general_guidance",
+    "summary": "In low, clear summer flows, subtle presentations and smaller patterns are often preferred; reduce splash and approach cautiously.",
+    "confidence": "low",
+    "tags": ["low-water", "clear-water", "summer", "small-patterns"],
+    "use_as": "background_only",
+    "sources": [{ "type": "internal_note", "ref": "internal_note_uk_south_004" }],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_south_windy_conditions_subsurface",
+    "scope": { "country": "UK", "region": "south", "river": null, "river_type": ["mixed", "freestone", "unknown"], "season": ["spring", "summer", "autumn"] },
+    "kind": "general_guidance",
+    "summary": "In breezy conditions where drifts are hard to control, subsurface options can be more forgiving; prioritise drift control over fly changes.",
+    "confidence": "low",
+    "tags": ["wind", "drift", "nymph", "control"],
+    "use_as": "background_only",
+    "sources": [{ "type": "internal_note", "ref": "internal_note_uk_south_005" }],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_south_evening_light_switch_if_rising",
+    "scope": { "country": "UK", "region": "south", "river": null, "river_type": ["chalkstream", "mixed"], "season": ["spring", "summer"] },
+    "kind": "angler_reports",
+    "summary": "Reports often suggest that if fish begin rising near last light, a simple dry or emerger choice can outperform subsurface options; let visible behaviour lead.",
+    "confidence": "low",
+    "tags": ["evening", "last-light", "rising-fish", "dry", "emerger"],
+    "use_as": "background_only",
+    "sources": [{ "type": "internal_note", "ref": "internal_note_uk_south_006" }],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_south_no_risers_keep_nymph_ready",
+    "scope": { "country": "UK", "region": "south", "river": null, "river_type": ["chalkstream", "mixed", "freestone"], "season": ["spring", "summer", "autumn"] },
+    "kind": "general_guidance",
+    "summary": "If there is no consistent surface feeding, a nymph approach remains a reliable baseline; consider switching only after repeated rises in a short window.",
+    "confidence": "low",
+    "tags": ["no-risers", "baseline", "nymph", "switching"],
+    "use_as": "background_only",
+    "sources": [{ "type": "internal_note", "ref": "internal_note_uk_south_007" }],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_south_chalkstream_subtle_presentations",
+    "scope": { "country": "UK", "region": "south", "river": null, "river_type": ["chalkstream"], "season": ["spring", "summer", "autumn"] },
+    "kind": "river_type_guidance",
+    "summary": "On chalkstreams, subtle drifts and careful approach often matter as much as pattern choice; err toward simple, generic patterns and good presentation.",
+    "confidence": "low",
+    "tags": ["chalkstream", "presentation", "drift", "simplicity"],
+    "use_as": "background_only",
+    "sources": [{ "type": "internal_note", "ref": "internal_note_uk_south_008" }],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_south_river_unknown_be_conservative",
+    "scope": { "country": "UK", "region": "south", "river": null, "river_type": ["unknown"], "season": ["unknown"] },
+    "kind": "safety_note",
+    "summary": "When river context is uncertain, prefer conservative, widely applicable choices and communicate uncertainty; avoid specific local claims.",
+    "confidence": "medium",
+    "tags": ["safety", "uncertainty", "conservative"],
+    "use_as": "background_only",
+    "sources": [{ "type": "internal_note", "ref": "internal_note_uk_south_009" }],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_south_rainfall_recent_shift_edges",
+    "scope": { "country": "UK", "region": "south", "river": null, "river_type": ["mixed", "freestone", "unknown"], "season": ["spring", "autumn", "winter"] },
+    "kind": "general_guidance",
+    "summary": "After recent rain, flows and colour can change quickly; focusing on slower edges and inside seams can be more productive than frequent pattern changes.",
+    "confidence": "low",
+    "tags": ["rain", "flows", "edges", "seams", "presentation"],
+    "use_as": "background_only",
+    "sources": [{ "type": "internal_note", "ref": "internal_note_uk_south_010" }],
+    "created_at": "2026-02-08"
+  }
+]

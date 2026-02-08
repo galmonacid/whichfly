@@ -3,18 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>whichFly – Right now</title>
+    <title>whichFly – By the riverside</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <main class="page">
       <header class="header">
         <p class="eyebrow">whichFly</p>
-        <h1>Right now</h1>
+        <h1>By the riverside</h1>
         <p class="subhead">Streamside fly choice for UK river trout.</p>
+        <div class="mode-toggle" role="tablist" aria-label="Mode selection">
+          <button id="modeRiverside" class="mode-tab active" role="tab" aria-selected="true" type="button">
+            By the riverside
+          </button>
+          <button id="modePlanning" class="mode-tab" role="tab" aria-selected="false" type="button">
+            Planning a trip
+          </button>
+        </div>
       </header>
 
-      <section class="card" aria-label="Right now inputs">
+      <section id="rightNowCard" class="card" aria-label="By the riverside inputs">
         <h2>Conditions</h2>
         <div class="river">
           <p class="label">River</p>
@@ -28,14 +36,10 @@
           <div id="riverManual" class="river-manual hidden">
             <label class="field">
               <span>Select river</span>
-              <select id="riverSelect">
-                <option value="">Choose a river</option>
-                <option value="River Wye">River Wye</option>
-                <option value="River Test">River Test</option>
-                <option value="River Itchen">River Itchen</option>
-              </select>
+              <input id="riverSelect" list="riverOptions" placeholder="Start typing a river" />
+              <datalist id="riverOptions"></datalist>
             </label>
-            <p class="muted small">TODO: Replace with real river list.</p>
+            <p class="muted small">Type to search the UK river list.</p>
           </div>
         </div>
         <label class="field">
@@ -46,10 +50,8 @@
             <option value="high">High</option>
           </select>
         </label>
-        <div id="confidenceGate" class="confidence hidden">
-          <p class="muted">
-            Low confidence. If you can, add one quick observation to improve the call.
-          </p>
+        <div class="observation">
+          <p class="label">Quick observation <span class="muted small">(optional)</span></p>
           <label class="field">
             <span>Are fish rising?</span>
             <select id="fishRising">
@@ -59,13 +61,37 @@
             </select>
           </label>
         </div>
-        <button id="getRecommendation" class="primary">Get recommendation</button>
+        <p id="confidenceNote" class="muted small hidden">
+          Low confidence. If you can, add one quick observation to improve the call.
+        </p>
+        <button id="getRecommendation" class="primary">Get fly recommendation</button>
+      </section>
+
+      <section id="planningCard" class="card hidden" aria-label="Planning inputs">
+        <h2>Planning a trip</h2>
+        <label class="field">
+          <span>Date</span>
+          <input id="planningDate" type="date" />
+        </label>
+        <label class="field">
+          <span>River</span>
+          <input id="planningRiver" list="riverOptions" placeholder="Start typing a river" />
+        </label>
+        <button id="getPlanningRecommendation" class="primary">Get planning fly recommendation</button>
       </section>
 
       <section class="card" aria-live="polite" aria-label="Recommendation output">
-        <h2>Recommendation</h2>
+        <h2>Fly recommendation</h2>
         <div id="recommendation" class="recommendation">
           <p class="muted">Select water level and request a recommendation.</p>
+        </div>
+        <div id="feedbackPanel" class="feedback hidden">
+          <p class="label">Did it work?</p>
+          <div class="feedback-actions">
+            <button id="feedbackYes" class="secondary" type="button">👍</button>
+            <button id="feedbackNo" class="secondary" type="button">👎</button>
+          </div>
+          <p id="feedbackMessage" class="muted small"></p>
         </div>
         <button id="toggleContext" class="ghost hidden" type="button">Show context used</button>
         <div id="contextPanel" class="context-panel hidden" aria-live="polite"></div>

@@ -7,6 +7,7 @@ No brand names. No obscure local patterns. This is a trust and safety guardrail.
 - The LLM MUST choose `primary.pattern` and `alternatives[].pattern` from this list only.
 - If conditions are uncertain, prefer conservative patterns (especially nymphs).
 - Sizes must remain in reasonable ranges for UK trout.
+- Backend allowlist validation is controlled by `ALLOWLIST_ENFORCEMENT` (off by default).
 
 ---
 

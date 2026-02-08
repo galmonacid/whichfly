@@ -10,10 +10,14 @@ const indexPath = path.resolve(__dirname, "..", "index.html");
 
 test("index.html includes Right now flow", async () => {
   const html = await readFile(indexPath, "utf-8");
-  assert.match(html, /Right now/i);
-  assert.match(html, /Get recommendation/i);
+  assert.match(html, /By the riverside/i);
+  assert.match(html, /Get fly recommendation/i);
   assert.match(html, /Requesting location/i);
   assert.match(html, /Select river/i);
   assert.match(html, /Are fish rising/i);
   assert.match(html, /Show context used/i);
+  assert.match(html, /Planning a trip/i);
+  assert.match(html, /Get planning fly recommendation/i);
+  assert.match(html, /By the riverside inputs/i);
+  assert.match(html, /Did it work\?/i);
 });

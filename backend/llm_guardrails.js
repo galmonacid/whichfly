@@ -7,7 +7,9 @@ const FORBIDDEN_PHRASES = [
   /you'?ll see olives/i,
   /near .* bridge/i,
   /on the .* beat/i,
-  /this stretch is known for/i
+  /this stretch is known for/i,
+  /anglers report/i,
+  /angler reports/i
 ];
 
 export const FORMAT_CORRECTION_MESSAGE =
@@ -74,19 +76,50 @@ export function buildFallbackResponse({ river, generatedAt, allowlist, contextUs
   };
 }
 
-function validateOutput(candidate, allowlist) {
-  const errors = [];
+function collectAllowlistViolations(payload, allowlist) {
+  if (!allowlist || allowlist.size === 0 || !payload) {
+    return [];
+  }
 
-  const validation = validateRightNowResponse(candidate, { allowlist });
+  const violations = [];
+  const record = (pattern) => {
+    if (pattern && !allowlist.has(pattern)) {
+      violations.push(pattern);
+    }
+  };
+
+  record(payload.primary?.pattern);
+  if (Array.isArray(payload.alternatives)) {
+    payload.alternatives.forEach((alt) => record(alt?.pattern));
+  }
+
+  return Array.from(new Set(violations));
+}
+
+function validateOutput(candidate, allowlist, enforceAllowlist) {
+  const errors = [];
+  const allowlistViolations = enforceAllowlist
+    ? collectAllowlistViolations(candidate, allowlist)
+    : [];
+
+  const validation = validateRightNowResponse(candidate, {
+    allowlist: enforceAllowlist ? allowlist : null
+  });
   if (!validation.ok) {
     errors.push(...validation.errors);
   }
 
-  if (hasForbiddenPhrases(candidate?.explanation)) {
+  const forbiddenPhraseDetected = hasForbiddenPhrases(candidate?.explanation);
+  if (forbiddenPhraseDetected) {
     errors.push("explanation contains forbidden phrases");
   }
 
-  return { ok: errors.length === 0, errors };
+  return {
+    ok: errors.length === 0,
+    errors,
+    allowlistViolations,
+    forbiddenPhraseDetected
+  };
 }
 
 export async function runLlmWithGuardrails({
@@ -96,7 +129,9 @@ export async function runLlmWithGuardrails({
   river,
   generatedAt,
   logger,
-  contextUsed
+  contextUsed,
+  mode,
+  enforceAllowlist = true
 }) {
   if (typeof callLlm !== "function") {
     throw new Error("callLlm must be provided");
@@ -125,15 +160,38 @@ export async function runLlmWithGuardrails({
       parsed.context_used = contextUsed;
     }
 
-    const validation = validateOutput(parsed, allowlist);
+    const validation = validateOutput(parsed, allowlist, enforceAllowlist);
     if (validation.ok) {
       return { ok: true, response: parsed, retried: attempt === 1 };
     }
 
+    if (validation.allowlistViolations.length > 0) {
+      log("allowlist_violation", {
+        patterns: validation.allowlistViolations,
+        action: attempt === 0 ? "retry" : "fallback_used",
+        mode: mode || "right_now"
+      });
+      log("pattern_rejected", {
+        patterns: validation.allowlistViolations,
+        mode: mode || "right_now"
+      });
+    }
+
+    if (validation.forbiddenPhraseDetected) {
+      log("forbidden_phrase_detected", {
+        action: attempt === 0 ? "retry" : "fallback_used",
+        mode: mode || "right_now"
+      });
+    }
+
     log("llm_output_failed_validation", { attempt, errors: validation.errors });
+    if (attempt === 0) {
+      log("retry_triggered", { reason: "validation_failed", attempt: 1, mode: mode || "right_now" });
+    }
   }
 
   log("llm_output_fallback", { reason: "invalid_or_missing_output" });
+  log("fallback_used", { reason: "invalid_or_missing_output", mode: mode || "right_now" });
   return {
     ok: false,
     response: buildFallbackResponse({ river, generatedAt, allowlist, contextUsed }),

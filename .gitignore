@@ -16,3 +16,6 @@ pnpm-debug.log*
 # Build output
 /dist/
 /build/
+
+# Local river data sources
+/data/sources/

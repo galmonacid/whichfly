@@ -18,6 +18,8 @@ The goal: preserve user trust by preventing invalid, unsafe, or hallucinated rec
 
 ### 3) Pattern allowlist enforcement
 - `primary.pattern` and all `alternatives[].pattern` must be in allowlist.
+- Allowlist lives in backend only (not passed to the model).
+- Feature flag: `ALLOWLIST_ENFORCEMENT=true` enables allowlist validation (default is off).
 - If any pattern not allowed:
   - retry once with explicit error “pattern not allowed”
   - fallback if still invalid
@@ -32,6 +34,7 @@ Reject (or force retry) if explanation contains:
   - “on the lower beat”
   - “near <named bridge>”
   - “this stretch is known for…”
+- “anglers report…” (no source claims)
 
 Acceptable phrasing:
 - “In cooler water, subsurface nymphs are a safe start.”
@@ -62,13 +65,16 @@ Acceptable phrasing:
 4. **Missing required fields fails schema**
 
 ### B) Allowlist tests
-1. **Primary pattern not allowed → retry then fallback**
-2. **Alternative pattern not allowed → retry then fallback**
+1. **Primary pattern not allowed → retry then fallback** (when allowlist enforcement on)
+2. **Alternative pattern not allowed → retry then fallback** (when allowlist enforcement on)
+3. **Mixed valid + invalid patterns → retry then fallback** (when allowlist enforcement on)
+4. **Allowlist enforcement off → invalid patterns pass schema but are not blocked**
 
 ### C) Hallucination filter tests
 1. Explanation includes “hatch is on” → rejected
 2. Explanation includes named location claim “near X bridge” → rejected
-3. Explanation uses generic seasonal reasoning → allowed
+3. Explanation includes “anglers report…” → rejected
+4. Explanation uses generic seasonal reasoning → allowed
 
 ### D) Retry behavior tests
 1. First LLM response non-JSON → triggers one retry
@@ -88,6 +94,26 @@ Define a minimal safe fallback:
 Test:
 - fallback response always passes schema
 - fallback uses only allowlist patterns
+
+---
+
+## Observability (production logging)
+
+Log semantic events (no PII):
+- `allowlist_violation` (include rejected pattern names + action)
+- `retry_triggered` (reason, attempt)
+- `fallback_used` (reason)
+
+Example:
+
+```json
+{
+  "event": "allowlist_violation",
+  "pattern": "MagicMayfly9000",
+  "action": "fallback_used",
+  "mode": "right_now"
+}
+```
 
 ---
 

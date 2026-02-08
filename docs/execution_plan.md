@@ -208,7 +208,58 @@ Add tests for accuracy-driven logic.
 Provide Change Summary with tests.
 ```
 
-Optional later (post-MVP): Replace curated list with OS Open Rivers + spatial index.
+### [DONE] 4.3 Expand river dataset pipeline (GB, with NI-ready inputs)
+**Goal:** Replace curated list with a scalable dataset pipeline.
+- Source GB rivers from OS Open Rivers (GeoPackage)
+- Add preprocessing script (OSGB → WGS84) to build a static dataset
+- Normalize English/Welsh naming (prefer English where available)
+- Filter out non-river forms and very short/ditch-like names (MVP)
+- Add attribution and license notes
+- Update tests for river lookup using the new dataset
+
+**Task prompt**
+```text
+Expand the river dataset to full UK coverage (GB + NI).
+- Ingest OS Open Rivers (GB) and NI Rivers Digital Datasets
+- Add a preprocessing script to generate a static dataset (ids, names, representative coords)
+- Add attribution/license notes
+- Update river lookup to use the new dataset
+Add unit tests for lookup and NI coverage.
+Provide Change Summary with tests and rollback notes.
+```
+
+### [DONE] 4.4 Add coarse reach segmentation for long rivers
+**Goal:** Improve weather/daylight accuracy without precise tramo detection.
+- Split long rivers into coarse reaches (e.g., upper/middle/lower or length buckets)
+- Add reach ids + representative coords
+- Use reach coords for weather/daylight enrichment
+- Expose reach sections in river selector (Upper/Middle/Lower)
+
+**Task prompt**
+```text
+Add coarse reach segmentation for long rivers.
+- Derive reach ids + representative coords for long rivers
+- Use reach coords for weather/daylight enrichment
+- Expose reach sections in the selector for manual choice
+Add tests for reach assignment and weather/daylight inputs.
+Provide Change Summary with tests and rollback notes.
+```
+
+### [] 4.5 Add NI coverage to the dataset
+**Goal:** Complete UK coverage by adding NI river data.
+- Provide NI Rivers Digital Datasets (GeoPackage or GeoJSON)
+- Run the build script to regenerate `data/uk_river_reaches.json`
+- Validate NI rivers appear in the selector
+
+**Task prompt**
+```text
+Add NI coverage by ingesting NI Rivers Digital Datasets.
+- Provide NI source files in data/sources
+- Regenerate data/uk_river_reaches.json
+- Verify NI rivers appear in /api/rivers options
+Add a small test to verify NI lookup.
+Provide Change Summary with tests and rollback notes.
+```
 
 ---
 
@@ -239,6 +290,25 @@ Optional later (post-MVP): Replace curated list with OS Open Rivers + spatial in
 - Uses allowlist
 - No LLM
 
+### [] 5.5 Grounding snippets store (curated, versioned)
+**Goal:** Add a controlled knowledge layer for grounding without scraping/quoting.
+- Add `knowledge/` folder with:
+  - `knowledge/heuristics/*.yaml` (stable guidance)
+  - `knowledge/snippets/*.json` (curated summaries with metadata + confidence)
+- Add loader code that selects relevant snippets by region/season and passes them to the LLM as background:
+  - must be framed as non-factual background ("do not assert as facts")
+  - must never introduce hatch claims
+- Add tests for snippet selection and prompt injection safety.
+
+**Task prompt**
+```text
+Add a curated grounding snippets store and loader:
+- Create the `knowledge/` structure (heuristics + snippets) with a few starter entries
+- Implement snippet selection (by region/season/river)
+- Pass selected snippets to the LLM as background with strict instructions
+- Add tests ensuring snippets cannot override schema/allowlist/guardrails
+Provide Change Summary with tests and rollback notes.
+
 ---
 
 ## [DONE] Phase 6 — LLM-first Recommendation Engine
@@ -259,9 +329,9 @@ Optional later (post-MVP): Replace curated list with OS Open Rivers + spatial in
 
 ---
 
-## [] Phase 7 — Planning Mode (Secondary)
+## [DONE] Phase 7 — Planning Mode (Secondary)
 
-### [] 7.1 Add planning UI (secondary entry)
+### [DONE] 7.1 Add planning UI (secondary entry)
 **Goal:** Keep “Right now” primary; planning is tucked away.
 - Link/button: “Planning a trip?”
 - Inputs: date + river (manual)
@@ -279,9 +349,9 @@ Add minimal tests. Provide Change Summary with tests and rollback notes.
 
 ---
 
-## [] Phase 8 — Feedback Loop (Lightweight)
+## [DONE] Phase 8 — Feedback Loop (Lightweight)
 
-### [] 8.1 Add “Did it work?” feedback capture (no accounts)
+### [DONE] 8.1 Add “Did it work?” feedback capture (no accounts)
 **Goal:** Collect signal without building a user system.
 - Buttons 👍 / 👎
 - Send event to backend log/store (initially server log or lightweight file)
@@ -296,6 +366,31 @@ Implement a lightweight feedback loop:
 Add tests for endpoint validation.
 Provide Change Summary with tests and rollback notes.
 ```
+
+### [] 8.2 Feedback aggregation & learning (no accounts)
+**Goal:** Use feedback as a weak signal to improve reliability without claiming "truth".
+- Add a lightweight aggregation job/script (daily/weekly) that produces summaries:
+  - success rate by confidence (high/medium/low)
+  - success rate by season
+  - success rate by method (dry/nymph/streamer)
+  - top patterns by season/region (as weak priors)
+- Store summaries as versioned artifacts (e.g. `data/feedback_summaries/*.json`)
+- Update backend to optionally use summaries to:
+  - adjust confidence gating thresholds
+  - bias pattern selection (within allowlist)
+  - choose which contextual snippets to pass to the LLM
+- Never surface raw stats to end users; never claim "other anglers did X".
+
+**Task prompt**
+```text
+Implement feedback aggregation and safe usage:
+- Create a script/job to aggregate /api/feedback events into summary JSON files
+- Add tests for aggregation logic
+- Update the recommender pipeline to optionally consume summaries as weak priors:
+  - only within allowlist
+  - no hatch/local factual claims
+  - do not change schema
+Provide Change Summary with tests and rollback notes.
 
 ---
 

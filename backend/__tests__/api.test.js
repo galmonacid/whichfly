@@ -79,3 +79,100 @@ test("POST /api/recommendation rejects empty body", async () => {
   const data = JSON.parse(response.body);
   assert.equal(data.error, "Invalid request");
 });
+
+test("POST /api/recommendation accepts planning payload", async () => {
+  const server = createServer();
+  const response = await request(server, {
+    url: "/api/recommendation",
+    method: "POST",
+    body: {
+      mode: "planning",
+      plannedDate: "2026-02-10",
+      riverName: "River Test"
+    }
+  });
+
+  assert.equal(response.statusCode, 200);
+  const data = JSON.parse(response.body);
+  assert.equal(data.meta.mode, "planning");
+});
+
+test("POST /api/recommendation rejects planning payload without date", async () => {
+  const server = createServer();
+  const response = await request(server, {
+    url: "/api/recommendation",
+    method: "POST",
+    body: {
+      mode: "planning",
+      riverName: "River Test"
+    }
+  });
+
+  assert.equal(response.statusCode, 400);
+  const data = JSON.parse(response.body);
+  assert.equal(data.error, "Invalid request");
+});
+
+test("GET /api/rivers returns a river list", async () => {
+  const server = createServer();
+  const response = await request(server, { url: "/api/rivers", method: "GET" });
+
+  assert.equal(response.statusCode, 200);
+  const data = JSON.parse(response.body);
+  assert.ok(Array.isArray(data.options));
+  assert.ok(data.options.length > 0);
+  assert.ok(data.options[0].label);
+});
+
+test("POST /api/river-suggestion returns a suggestion", async () => {
+  const server = createServer();
+  const response = await request(server, {
+    url: "/api/river-suggestion",
+    method: "POST",
+    body: { gps: { lat: 52.0, lon: -3.0, accuracy: 30 } }
+  });
+
+  assert.equal(response.statusCode, 200);
+  const data = JSON.parse(response.body);
+  assert.ok(data.river);
+  assert.ok(data.river.name);
+});
+
+test("POST /api/feedback accepts a valid payload", async () => {
+  const server = createServer();
+  const response = await request(server, {
+    url: "/api/feedback",
+    method: "POST",
+    body: {
+      recommendationId: "rec_123",
+      riverName: "River Test",
+      sessionId: "sess_abc",
+      outcome: "up",
+      context: {
+        mode: "right_now",
+        waterLevel: "normal",
+        confidence: "medium"
+      }
+    }
+  });
+
+  assert.equal(response.statusCode, 200);
+  const data = JSON.parse(response.body);
+  assert.equal(data.ok, true);
+});
+
+test("POST /api/feedback rejects invalid payload", async () => {
+  const server = createServer();
+  const response = await request(server, {
+    url: "/api/feedback",
+    method: "POST",
+    body: {
+      riverName: "River Test",
+      sessionId: "sess_abc"
+    }
+  });
+
+  assert.equal(response.statusCode, 400);
+  const data = JSON.parse(response.body);
+  assert.equal(data.error, "Invalid request");
+});

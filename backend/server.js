@@ -2,15 +2,16 @@ import http from "node:http";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { validateRightNowRequest } from "./contracts.js";
-import { fetchWeather } from "./weather.js";
+import { validateFeedbackRequest, validateRightNowRequest } from "./contracts.js";
+import { fetchWeather, fetchWeatherForecast } from "./weather.js";
 import { fetchDaylight } from "./daylight.js";
-import { suggestRiver } from "./river_suggestion.js";
+import { findReachById, findRiverByName, listRiverOptions, suggestRiverWithReach } from "./river_suggestion.js";
 import { validateRightNowResponse } from "./llm_validation.js";
 import { loadFlyAllowlist } from "./allowlist.js";
 import { runLlmWithGuardrails, buildFallbackResponse } from "./llm_guardrails.js";
 import { buildRuntimePrompt, callOpenAiResponses, loadPromptSections, loadResponseSchema } from "./llm_client.js";
 import { loadEnvLocal } from "./env.js";
+import { deriveSeasonFromDate } from "./season.js";
 
 loadEnvLocal();
 
@@ -24,8 +25,15 @@ const FLY_ALLOWLIST = loadFlyAllowlist();
 const LLM_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 const LLM_DEBUG = process.env.LLM_DEBUG === "true";
+const ALLOWLIST_ENFORCEMENT = process.env.ALLOWLIST_ENFORCEMENT === "true";
 const PROMPT_SECTIONS = loadPromptSections();
 const RESPONSE_SCHEMA = loadResponseSchema();
+const GUARDRAIL_LOG_EVENTS = new Set([
+  "allowlist_violation",
+  "pattern_rejected",
+  "retry_triggered",
+  "fallback_used"
+]);
 
 // Placeholder config for future external integrations (not used in MVP).
 const WEATHER_API_BASE_URL = process.env.WEATHER_API_BASE_URL || "https://api.open-meteo.com";
@@ -142,9 +150,25 @@ export function createServer() {
           return;
         }
 
+        const mode = payload.mode || "right_now";
         let river = MOCK_RECOMMENDATION.river;
         let weatherContext = null;
         let daylightContext = null;
+        let weatherSource = null;
+        let reachForContext = null;
+
+        if (payload.riverReachId) {
+          const reachMatch = findReachById(payload.riverReachId);
+          if (reachMatch) {
+            reachForContext = reachMatch;
+            river = {
+              name: reachMatch.name,
+              confidence: "high",
+              source: "user_selected",
+              distance_m: null
+            };
+          }
+        }
 
         if (payload.riverName) {
           river = {
@@ -153,6 +177,21 @@ export function createServer() {
             source: "user_selected",
             distance_m: null
           };
+          reachForContext = reachForContext || findRiverByName(payload.riverName);
+        }
+
+        if (mode === "planning" && payload.riverName) {
+          const logger = process.env.NODE_ENV === "production"
+            ? () => {}
+            : (message, meta = {}) => console.log(message, meta);
+          const match = reachForContext || findRiverByName(payload.riverName);
+          if (!reachForContext) {
+            reachForContext = match;
+          }
+          if (match) {
+            weatherContext = await fetchWeatherForecast(match.lat, match.lon, payload.plannedDate, { logger });
+            weatherSource = "forecast";
+          }
         }
 
         if (payload.gps) {
@@ -160,16 +199,24 @@ export function createServer() {
             ? () => {}
             : (message, meta = {}) => console.log(message, meta);
           // Weather is fetched for internal context only; response stays mocked for now.
-          weatherContext = await fetchWeather(payload.gps.lat, payload.gps.lon, { logger });
-          daylightContext = await fetchDaylight(payload.gps.lat, payload.gps.lon, { logger });
+          if (!payload.riverName) {
+            const suggestion = suggestRiverWithReach(payload.gps.lat, payload.gps.lon, {
+              accuracyM: payload.gps.accuracy ?? null
+            });
+            river = suggestion.river;
+            reachForContext = suggestion.reach || null;
+          }
+          const contextCoords = reachForContext
+            ? { lat: reachForContext.lat, lon: reachForContext.lon }
+            : { lat: payload.gps.lat, lon: payload.gps.lon };
+          if (mode !== "planning") {
+            weatherContext = await fetchWeather(contextCoords.lat, contextCoords.lon, { logger });
+            weatherSource = "current";
+            daylightContext = await fetchDaylight(contextCoords.lat, contextCoords.lon, { logger });
+          }
           if (LLM_DEBUG) {
             console.log("weather_context", weatherContext);
             console.log("daylight_context", daylightContext);
-          }
-          if (!payload.riverName) {
-            river = suggestRiver(payload.gps.lat, payload.gps.lon, {
-              accuracyM: payload.gps.accuracy ?? null
-            });
           }
         }
 
@@ -179,16 +226,22 @@ export function createServer() {
           river,
           meta: {
             ...MOCK_RECOMMENDATION.meta,
-            generated_at: generatedAt
+            generated_at: generatedAt,
+            mode
           }
         };
 
+        const season = deriveSeasonFromDate(mode === "planning" ? payload.plannedDate : undefined);
         const inputs = {
           water_level: payload.waterLevel === "low"
             ? "Low"
             : payload.waterLevel === "high"
               ? "High"
-              : "Normal",
+              : payload.waterLevel
+                ? "Normal"
+                : null,
+          planned_date: payload.plannedDate || null,
+          season,
           observations: {
             fish_rising: payload.observations?.fishRising ?? null,
             insects_seen: null
@@ -201,7 +254,7 @@ export function createServer() {
                 temperature_c: weatherContext.temperature,
                 precipitation_mm: weatherContext.precipitation,
                 cloud_cover_pct: weatherContext.cloudCover,
-                wind_speed_kph: null
+                wind_speed_kph: weatherContext.windSpeed ?? null
               }
             : {
                 temperature_c: null,
@@ -224,12 +277,24 @@ export function createServer() {
           if (LLM_DEBUG) {
             console.log("llm_attempt");
           }
+          const guardrailLogger = (event, meta = {}) => {
+            if (process.env.NODE_ENV === "production") {
+              if (!GUARDRAIL_LOG_EVENTS.has(event)) {
+                return;
+              }
+              console.log(JSON.stringify({ event, ...meta }));
+              return;
+            }
+            if (LLM_DEBUG) {
+              console.log(event, meta);
+            }
+          };
           try {
             const runtimePrompt = buildRuntimePrompt({
               river,
               inputs,
               context: contextUsed,
-              allowlist: FLY_ALLOWLIST
+              mode
             });
 
             const callLlm = (systemPrompt) =>
@@ -250,13 +315,19 @@ export function createServer() {
               allowlist: FLY_ALLOWLIST,
               river,
               generatedAt,
-              logger: LLM_DEBUG ? (event, meta = {}) => console.log(event, meta) : undefined,
-              contextUsed
+              logger: guardrailLogger,
+              contextUsed,
+              mode,
+              enforceAllowlist: ALLOWLIST_ENFORCEMENT
             });
 
             responsePayload = {
               ...llmResult.response,
-              context_used: contextUsed
+              context_used: contextUsed,
+              meta: {
+                ...llmResult.response.meta,
+                mode
+              }
             };
             if (LLM_DEBUG) {
               console.log("llm_result", { ok: llmResult.ok, retried: llmResult.retried });
@@ -288,7 +359,8 @@ export function createServer() {
           responsePayload = buildFallbackResponse({
             river: responsePayload.river,
             generatedAt,
-            allowlist: FLY_ALLOWLIST
+            allowlist: FLY_ALLOWLIST,
+            contextUsed
           });
           responsePayload.confidence_reasons = [
             "Low confidence from model",
@@ -296,8 +368,13 @@ export function createServer() {
           ].slice(0, 6);
         }
 
+        responsePayload.meta = {
+          ...responsePayload.meta,
+          mode
+        };
+
         const outputValidation = validateRightNowResponse(responsePayload, {
-          allowlist: FLY_ALLOWLIST
+          allowlist: ALLOWLIST_ENFORCEMENT ? FLY_ALLOWLIST : null
         });
         if (!outputValidation.ok) {
           json(res, 500, { error: "Invalid recommendation output", details: outputValidation.errors });
@@ -305,6 +382,78 @@ export function createServer() {
         }
 
         json(res, 200, responsePayload);
+        return;
+      } catch (error) {
+        json(res, 400, { error: "Invalid JSON" });
+        return;
+      }
+    }
+
+    if (req.url === "/api/rivers") {
+      if (req.method !== "GET") {
+        json(res, 405, { error: "Method not allowed" });
+        return;
+      }
+      const options = listRiverOptions();
+      json(res, 200, { options });
+      return;
+    }
+
+    if (req.url === "/api/river-suggestion") {
+      if (req.method !== "POST") {
+        json(res, 405, { error: "Method not allowed" });
+        return;
+      }
+      try {
+        const payload = await readJsonBody(req);
+        if (!payload || !payload.gps) {
+          json(res, 400, { error: "Invalid request", details: ["gps is required."] });
+          return;
+        }
+        const { lat, lon, accuracy } = payload.gps;
+        if (
+          typeof lat !== "number" ||
+          typeof lon !== "number" ||
+          Number.isNaN(lat) ||
+          Number.isNaN(lon)
+        ) {
+          json(res, 400, { error: "Invalid request", details: ["gps.lat and gps.lon must be numbers."] });
+          return;
+        }
+        const suggestion = suggestRiverWithReach(lat, lon, { accuracyM: accuracy ?? null });
+        json(res, 200, { river: suggestion.river });
+        return;
+      } catch (error) {
+        json(res, 400, { error: "Invalid JSON" });
+        return;
+      }
+    }
+
+    if (req.url === "/api/feedback") {
+      if (req.method !== "POST") {
+        json(res, 405, { error: "Method not allowed" });
+        return;
+      }
+      try {
+        const payload = await readJsonBody(req);
+        if (payload === null) {
+          json(res, 400, { error: "Invalid request", details: ["Request body is required."] });
+          return;
+        }
+        const validation = validateFeedbackRequest(payload);
+        if (!validation.ok) {
+          json(res, 400, { error: "Invalid request", details: validation.errors });
+          return;
+        }
+        if (process.env.NODE_ENV !== "production") {
+          console.log("feedback_received", {
+            recommendationId: payload.recommendationId,
+            riverName: payload.riverName,
+            outcome: payload.outcome,
+            mode: payload.context?.mode || null
+          });
+        }
+        json(res, 200, { ok: true });
         return;
       } catch (error) {
         json(res, 400, { error: "Invalid JSON" });
