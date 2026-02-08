@@ -22,7 +22,14 @@ function hasForbiddenPhrases(explanation) {
   return FORBIDDEN_PHRASES.some((pattern) => pattern.test(explanation));
 }
 
-function pickFallbackPattern(allowlist) {
+function pickFallbackPattern(allowlist, patternBias = []) {
+  if (Array.isArray(patternBias) && allowlist && allowlist.size > 0) {
+    for (const pattern of patternBias) {
+      if (allowlist.has(pattern)) {
+        return pattern;
+      }
+    }
+  }
   if (allowlist && allowlist.has("Pheasant Tail Nymph")) {
     return "Pheasant Tail Nymph";
   }
@@ -35,7 +42,13 @@ function pickFallbackPattern(allowlist) {
   return "Pheasant Tail Nymph";
 }
 
-export function buildFallbackResponse({ river, generatedAt, allowlist, contextUsed } = {}) {
+export function buildFallbackResponse({
+  river,
+  generatedAt,
+  allowlist,
+  contextUsed,
+  patternBias
+} = {}) {
   const safeRiver = river || {
     name: "Unknown",
     source: "unknown",
@@ -43,7 +56,7 @@ export function buildFallbackResponse({ river, generatedAt, allowlist, contextUs
     distance_m: null
   };
 
-  const pattern = pickFallbackPattern(allowlist);
+  const pattern = pickFallbackPattern(allowlist, patternBias);
 
   return {
     river: safeRiver,
@@ -131,7 +144,8 @@ export async function runLlmWithGuardrails({
   logger,
   contextUsed,
   mode,
-  enforceAllowlist = true
+  enforceAllowlist = true,
+  patternBias
 }) {
   if (typeof callLlm !== "function") {
     throw new Error("callLlm must be provided");
@@ -194,7 +208,7 @@ export async function runLlmWithGuardrails({
   log("fallback_used", { reason: "invalid_or_missing_output", mode: mode || "right_now" });
   return {
     ok: false,
-    response: buildFallbackResponse({ river, generatedAt, allowlist, contextUsed }),
+    response: buildFallbackResponse({ river, generatedAt, allowlist, contextUsed, patternBias }),
     retried: true
   };
 }

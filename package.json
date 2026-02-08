@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "node backend/server.js",
+    "aggregate-feedback": "node scripts/aggregate_feedback.js",
     "test": "node --test"
   }
 }

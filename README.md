@@ -48,6 +48,9 @@ If it cannot be used quickly at the river, it does not belong in the MVP.
 ### Run tests
 - `npm test`
 
+### Aggregate feedback summaries
+- `npm run aggregate-feedback`
+
 ### Environment variables
 - `PORT`: HTTP port for the dev server (default `3000`)
 - `WEATHER_API_BASE_URL`: Placeholder for weather API base URL
@@ -55,6 +58,9 @@ If it cannot be used quickly at the river, it does not belong in the MVP.
 - `OPENAI_API_KEY`: OpenAI API key (required for LLM-first recommendations)
 - `OPENAI_MODEL`: OpenAI model name (default `gpt-4o-mini`)
 - `ALLOWLIST_ENFORCEMENT`: Set to `true` to enforce fly allowlist validation (default `false`)
+- `FEEDBACK_STORE_PATH`: Path to append feedback events (JSONL). If unset, feedback is not stored.
+- `FEEDBACK_SUMMARY_PATH`: Path to read feedback summaries (default `data/feedback_summaries/latest.json`)
+- `FEEDBACK_SUMMARY_DIR`: Output directory for the aggregation script (default `data/feedback_summaries/`)
 
 ### Local env file (optional)
 Create a `.env.local` in the project root to set environment variables for local dev.

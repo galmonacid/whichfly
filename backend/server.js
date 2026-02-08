@@ -1,5 +1,5 @@
 import http from "node:http";
-import { readFile } from "node:fs/promises";
+import { readFile, appendFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { validateFeedbackRequest, validateRightNowRequest } from "./contracts.js";
@@ -14,6 +14,12 @@ import { loadEnvLocal } from "./env.js";
 import { deriveSeasonFromDate } from "./season.js";
 import { loadGroundingSnippets, selectGroundingSnippets } from "./knowledge.js";
 import { deriveRegionFromCoords, deriveRiverType } from "./river_type.js";
+import {
+  adjustConfidenceWithSummary,
+  derivePatternBias,
+  loadFeedbackSummary,
+  shouldIncludeAnglerReports
+} from "./feedback_summary.js";
 
 loadEnvLocal();
 
@@ -27,8 +33,11 @@ const FLY_ALLOWLIST = loadFlyAllowlist();
 const GROUNDING_SNIPPETS = loadGroundingSnippets();
 const LLM_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
-const LLM_DEBUG = process.env.LLM_DEBUG === "true";
+const IS_PROD = process.env.NODE_ENV === "production";
+const LLM_DEBUG = !IS_PROD && process.env.LLM_DEBUG === "true";
 const ALLOWLIST_ENFORCEMENT = process.env.ALLOWLIST_ENFORCEMENT === "true";
+const FEEDBACK_STORE_PATH = process.env.FEEDBACK_STORE_PATH || "";
+const FEEDBACK_SUMMARY = loadFeedbackSummary(process.env.FEEDBACK_SUMMARY_PATH);
 const PROMPT_SECTIONS = loadPromptSections();
 const RESPONSE_SCHEMA = loadResponseSchema();
 const GUARDRAIL_LOG_EVENTS = new Set([
@@ -82,6 +91,14 @@ const MOCK_RECOMMENDATION = {
   }
 };
 
+function logEvent(event, meta = {}) {
+  if (IS_PROD) {
+    console.log(JSON.stringify({ event, ...meta }));
+    return;
+  }
+  console.log(event, meta);
+}
+
 function json(res, statusCode, payload) {
   const body = JSON.stringify(payload, null, 2);
   res.writeHead(statusCode, {
@@ -126,6 +143,19 @@ async function serveStatic(res, filePath) {
   }
 }
 
+async function storeFeedbackEvent(eventPayload) {
+  if (!FEEDBACK_STORE_PATH) {
+    return;
+  }
+  try {
+    const dir = path.dirname(FEEDBACK_STORE_PATH);
+    await mkdir(dir, { recursive: true });
+    await appendFile(FEEDBACK_STORE_PATH, `${JSON.stringify(eventPayload)}\n`);
+  } catch (error) {
+    logEvent("feedback_store_error", { message: error?.message || "unknown" });
+  }
+}
+
 export function createServer() {
   return http.createServer(async (req, res) => {
     if (!req.url) {
@@ -141,7 +171,14 @@ export function createServer() {
       }
 
       try {
-        const payload = await readJsonBody(req);
+        let payload;
+        try {
+          payload = await readJsonBody(req);
+        } catch (error) {
+          logEvent("request_invalid_json", { path: req.url });
+          json(res, 400, { error: "Invalid JSON" });
+          return;
+        }
         if (payload === null) {
           json(res, 400, { error: "Invalid request", details: ["Request body is required."] });
           return;
@@ -149,6 +186,7 @@ export function createServer() {
 
         const validation = validateRightNowRequest(payload);
         if (!validation.ok) {
+          logEvent("request_validation_failed", { path: req.url });
           json(res, 400, { error: "Invalid request", details: validation.errors });
           return;
         }
@@ -259,13 +297,21 @@ export function createServer() {
           : null;
         const derivedRegion = regionFromReach || regionFromGps;
         const derivedRiverType = deriveRiverType(river?.name || null, derivedRegion);
+        const includeAnglerReports = shouldIncludeAnglerReports(FEEDBACK_SUMMARY);
         const snippetContext = {
           riverId: reachForContext?.river_id || null,
           riverName: river?.name || null,
           riverType: derivedRiverType.type,
           season
         };
-        const groundingSnippets = selectGroundingSnippets(GROUNDING_SNIPPETS, snippetContext);
+        const groundingSnippets = selectGroundingSnippets(GROUNDING_SNIPPETS, snippetContext, {
+          maxAnglerReports: includeAnglerReports ? 1 : 0
+        });
+        const patternBias = derivePatternBias(FEEDBACK_SUMMARY, {
+          season,
+          region: derivedRegion,
+          allowlist: FLY_ALLOWLIST
+        });
 
         const contextUsed = {
           weather: weatherContext
@@ -338,7 +384,8 @@ export function createServer() {
               logger: guardrailLogger,
               contextUsed,
               mode,
-              enforceAllowlist: ALLOWLIST_ENFORCEMENT
+              enforceAllowlist: ALLOWLIST_ENFORCEMENT,
+              patternBias
             });
 
             responsePayload = {
@@ -360,7 +407,8 @@ export function createServer() {
               river,
               generatedAt,
               allowlist: FLY_ALLOWLIST,
-              contextUsed
+              contextUsed,
+              patternBias
             });
           }
         } else {
@@ -371,8 +419,22 @@ export function createServer() {
             river,
             generatedAt,
             allowlist: FLY_ALLOWLIST,
-            contextUsed
+            contextUsed,
+            patternBias
           });
+        }
+
+        const confidenceAdjustment = adjustConfidenceWithSummary(
+          responsePayload.confidence,
+          FEEDBACK_SUMMARY
+        );
+        if (confidenceAdjustment.adjusted) {
+          responsePayload.confidence = confidenceAdjustment.confidence;
+          responsePayload.confidence_reasons = [
+            "Conservative adjustment applied",
+            ...(responsePayload.confidence_reasons || [])
+          ].slice(0, 6);
+          logEvent("confidence_adjusted", { mode });
         }
 
         if (responsePayload.confidence === "low" && responsePayload.primary?.type !== "nymph") {
@@ -380,7 +442,8 @@ export function createServer() {
             river: responsePayload.river,
             generatedAt,
             allowlist: FLY_ALLOWLIST,
-            contextUsed
+            contextUsed,
+            patternBias
           });
           responsePayload.confidence_reasons = [
             "Low confidence from model",
@@ -397,6 +460,7 @@ export function createServer() {
           allowlist: ALLOWLIST_ENFORCEMENT ? FLY_ALLOWLIST : null
         });
         if (!outputValidation.ok) {
+          logEvent("response_validation_failed", { path: req.url });
           json(res, 500, { error: "Invalid recommendation output", details: outputValidation.errors });
           return;
         }
@@ -404,7 +468,8 @@ export function createServer() {
         json(res, 200, responsePayload);
         return;
       } catch (error) {
-        json(res, 400, { error: "Invalid JSON" });
+        logEvent("request_error", { path: req.url });
+        json(res, 500, { error: "Server error" });
         return;
       }
     }
@@ -425,7 +490,14 @@ export function createServer() {
         return;
       }
       try {
-        const payload = await readJsonBody(req);
+        let payload;
+        try {
+          payload = await readJsonBody(req);
+        } catch (error) {
+          logEvent("request_invalid_json", { path: req.url });
+          json(res, 400, { error: "Invalid JSON" });
+          return;
+        }
         if (!payload || !payload.gps) {
           json(res, 400, { error: "Invalid request", details: ["gps is required."] });
           return;
@@ -444,7 +516,8 @@ export function createServer() {
         json(res, 200, { river: suggestion.river });
         return;
       } catch (error) {
-        json(res, 400, { error: "Invalid JSON" });
+        logEvent("request_error", { path: req.url });
+        json(res, 500, { error: "Server error" });
         return;
       }
     }
@@ -455,28 +528,47 @@ export function createServer() {
         return;
       }
       try {
-        const payload = await readJsonBody(req);
+        let payload;
+        try {
+          payload = await readJsonBody(req);
+        } catch (error) {
+          logEvent("request_invalid_json", { path: req.url });
+          json(res, 400, { error: "Invalid JSON" });
+          return;
+        }
         if (payload === null) {
           json(res, 400, { error: "Invalid request", details: ["Request body is required."] });
           return;
         }
         const validation = validateFeedbackRequest(payload);
         if (!validation.ok) {
+          logEvent("request_validation_failed", { path: req.url });
           json(res, 400, { error: "Invalid request", details: validation.errors });
           return;
         }
-        if (process.env.NODE_ENV !== "production") {
-          console.log("feedback_received", {
-            recommendationId: payload.recommendationId,
-            riverName: payload.riverName,
-            outcome: payload.outcome,
-            mode: payload.context?.mode || null
-          });
+        if (IS_PROD) {
+          logEvent("feedback_received", { mode: payload.context?.mode || null });
         }
+
+        const feedbackEvent = {
+          received_at: new Date().toISOString(),
+          outcome: payload.outcome,
+          river_name: payload.riverName,
+          river_reach_id: payload.riverReachId || null,
+          pattern: payload.pattern || null,
+          fly_type: payload.flyType || null,
+          confidence: payload.context?.confidence || null,
+          mode: payload.context?.mode || null,
+          planned_date: payload.context?.plannedDate || null,
+          water_level: payload.context?.waterLevel || null
+        };
+        await storeFeedbackEvent(feedbackEvent);
+
         json(res, 200, { ok: true });
         return;
       } catch (error) {
-        json(res, 400, { error: "Invalid JSON" });
+        logEvent("request_error", { path: req.url });
+        json(res, 500, { error: "Server error" });
         return;
       }
     }

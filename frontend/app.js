@@ -24,6 +24,8 @@ const feedbackYesBtn = document.getElementById("feedbackYes");
 const feedbackNoBtn = document.getElementById("feedbackNo");
 const feedbackMessageEl = document.getElementById("feedbackMessage");
 
+const LAST_RECOMMENDATION_KEY = "whichfly_last_recommendation";
+
 let confirmedRiver = "";
 let gpsCoords = null;
 const riverOptionMap = new Map();
@@ -129,8 +131,98 @@ function buildRecommendationId(data) {
   return `rec_${stamp}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function saveLastRecommendation(payload) {
+  try {
+    localStorage.setItem(LAST_RECOMMENDATION_KEY, JSON.stringify(payload));
+  } catch (error) {
+    // Ignore cache failures (e.g., private mode).
+  }
+}
+
+function loadLastRecommendation() {
+  try {
+    const raw = localStorage.getItem(LAST_RECOMMENDATION_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (error) {
+    return null;
+  }
+}
+
+function formatTimestamp(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "recently";
+  }
+  return date.toLocaleString();
+}
+
+function applyRecommendation(data, { inputs, cachedAt } = {}) {
+  const alternatives = data.alternatives
+    .map(
+      (alt) => `
+        <li>
+          <strong>${alt.pattern}</strong> (${alt.type}, size ${alt.size})
+          ${alt.when ? `<span class=\"muted\">${alt.when}</span>` : ""}
+        </li>
+      `
+    )
+    .join("");
+
+  const responseRiverLabel = data.river?.name || inputs?.riverLabel || inputs?.riverName || "Unknown";
+  const isCached = Boolean(cachedAt);
+  if (data.confidence === "low") {
+    confidenceNoteEl.classList.remove("hidden");
+  } else {
+    confidenceNoteEl.classList.add("hidden");
+  }
+
+  lastRecommendation = {
+    id: buildRecommendationId(data),
+    riverName: data.river?.name || inputs?.riverName || "Unknown",
+    riverLabel: responseRiverLabel,
+    riverReachId: inputs?.riverReachId || null,
+    mode: data.meta?.mode || inputs?.mode || "right_now",
+    waterLevel: inputs?.waterLevel || null,
+    plannedDate: inputs?.plannedDate || null,
+    confidence: data.confidence,
+    fishRising: inputs?.fishRising || "unknown",
+    pattern: data.primary?.pattern || null,
+    flyType: data.primary?.type || null,
+    cached: isCached
+  };
+  renderContextPanel(data.context_used);
+  if (!isCached) {
+    showFeedbackPanel();
+  } else {
+    resetFeedbackPanel();
+  }
+
+  const cachedNote = isCached
+    ? `<p class="muted">No signal. Showing last saved recommendation from ${formatTimestamp(cachedAt)}.</p>`
+    : "";
+
+  recommendationEl.innerHTML = `
+    ${cachedNote}
+    <div>
+      <p class="eyebrow">Suggested river: ${responseRiverLabel}</p>
+      <h3>${data.primary.pattern}</h3>
+      <p>${data.primary.type} · size ${data.primary.size}</p>
+      <p class="explanation">${data.explanation}</p>
+    </div>
+    <div class="alternatives">
+      <h4>Alternatives</h4>
+      <ul>${alternatives}</ul>
+    </div>
+  `;
+}
+
 async function sendFeedback(outcome) {
   if (!lastRecommendation) return;
+  if (lastRecommendation.cached) {
+    feedbackMessageEl.textContent = "Feedback unavailable for cached recommendations.";
+    return;
+  }
   feedbackYesBtn.disabled = true;
   feedbackNoBtn.disabled = true;
   feedbackMessageEl.textContent = "Sending...";
@@ -148,6 +240,9 @@ async function sendFeedback(outcome) {
       body: JSON.stringify({
         recommendationId: lastRecommendation.id,
         riverName: lastRecommendation.riverName,
+        riverReachId: lastRecommendation.riverReachId || undefined,
+        pattern: lastRecommendation.pattern || undefined,
+        flyType: lastRecommendation.flyType || undefined,
         sessionId: getSessionId(),
         outcome,
         context
@@ -276,53 +371,30 @@ async function fetchRecommendation() {
     }
     const data = await response.json();
 
-    const alternatives = data.alternatives
-      .map(
-        (alt) => `
-          <li>
-            <strong>${alt.pattern}</strong> (${alt.type}, size ${alt.size})
-            ${alt.when ? `<span class=\"muted\">${alt.when}</span>` : ""}
-          </li>
-        `
-      )
-      .join("");
-
-    const responseRiverLabel = data.river?.name || selectedRiverLabel || "Unknown";
-    if (data.confidence === "low") {
-      confidenceNoteEl.classList.remove("hidden");
-    } else {
-      confidenceNoteEl.classList.add("hidden");
-    }
-
-    lastRecommendation = {
-      id: buildRecommendationId(data),
-      riverName: data.river?.name || riverName,
-      riverLabel: responseRiverLabel,
-      mode: data.meta?.mode || "right_now",
+    const inputState = {
+      riverName,
+      riverLabel: selectedRiverLabel,
+      riverReachId: selectedOption?.reach_id || null,
+      mode: "right_now",
       waterLevel: waterLevelSelect.value,
       plannedDate: null,
-      confidence: data.confidence,
       fishRising: fishRisingSelect.value
     };
-    renderContextPanel(data.context_used);
-    showFeedbackPanel();
-
-    recommendationEl.innerHTML = `
-      <div>
-        <p class="eyebrow">Suggested river: ${responseRiverLabel}</p>
-        <h3>${data.primary.pattern}</h3>
-        <p>${data.primary.type} · size ${data.primary.size}</p>
-        <p class="explanation">${data.explanation}</p>
-      </div>
-      <div class="alternatives">
-        <h4>Alternatives</h4>
-        <ul>${alternatives}</ul>
-      </div>
-    `;
+    applyRecommendation(data, { inputs: inputState });
+    saveLastRecommendation({
+      savedAt: new Date().toISOString(),
+      data,
+      inputs: inputState
+    });
   } catch (error) {
-    recommendationEl.innerHTML = "<p class=\"muted\">Unable to load recommendation.</p>";
-    resetFeedbackPanel();
-    lastRecommendation = null;
+    const cached = loadLastRecommendation();
+    if (cached?.data) {
+      applyRecommendation(cached.data, { inputs: cached.inputs, cachedAt: cached.savedAt });
+    } else {
+      recommendationEl.innerHTML = "<p class=\"muted\">Unable to load recommendation.</p>";
+      resetFeedbackPanel();
+      lastRecommendation = null;
+    }
   }
 }
 
@@ -358,53 +430,30 @@ async function fetchPlanningRecommendation() {
     }
     const data = await response.json();
 
-    if (data.confidence === "low") {
-      confidenceNoteEl.classList.remove("hidden");
-    } else {
-      confidenceNoteEl.classList.add("hidden");
-    }
-
-    lastRecommendation = {
-      id: buildRecommendationId(data),
-      riverName: data.river?.name || planningRiver,
+    const inputState = {
+      riverName: planningRiver,
       riverLabel: planningLabel,
-      mode: data.meta?.mode || "planning",
+      riverReachId: planningOption?.reach_id || null,
+      mode: "planning",
       waterLevel: null,
       plannedDate,
-      confidence: data.confidence,
       fishRising: "unknown"
     };
-    renderContextPanel(data.context_used);
-    showFeedbackPanel();
-
-    const alternatives = data.alternatives
-      .map(
-        (alt) => `
-          <li>
-            <strong>${alt.pattern}</strong> (${alt.type}, size ${alt.size})
-            ${alt.when ? `<span class=\"muted\">${alt.when}</span>` : ""}
-          </li>
-        `
-      )
-      .join("");
-
-    const riverLabel = data.river?.name || "Unknown";
-    recommendationEl.innerHTML = `
-      <div>
-        <p class="eyebrow">Suggested river: ${riverLabel}</p>
-        <h3>${data.primary.pattern}</h3>
-        <p>${data.primary.type} · size ${data.primary.size}</p>
-        <p class="explanation">${data.explanation}</p>
-      </div>
-      <div class="alternatives">
-        <h4>Alternatives</h4>
-        <ul>${alternatives}</ul>
-      </div>
-    `;
+    applyRecommendation(data, { inputs: inputState });
+    saveLastRecommendation({
+      savedAt: new Date().toISOString(),
+      data,
+      inputs: inputState
+    });
   } catch (error) {
-    recommendationEl.innerHTML = "<p class=\"muted\">Unable to load recommendation.</p>";
-    resetFeedbackPanel();
-    lastRecommendation = null;
+    const cached = loadLastRecommendation();
+    if (cached?.data) {
+      applyRecommendation(cached.data, { inputs: cached.inputs, cachedAt: cached.savedAt });
+    } else {
+      recommendationEl.innerHTML = "<p class=\"muted\">Unable to load recommendation.</p>";
+      resetFeedbackPanel();
+      lastRecommendation = null;
+    }
   }
 }
 

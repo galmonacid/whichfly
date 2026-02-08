@@ -318,6 +318,27 @@ test("buildFallbackResponse uses allowlist when default not present", () => {
   assert.equal(fallback.primary.pattern, "Elk Hair Caddis");
 });
 
+test("buildFallbackResponse uses pattern bias when provided", () => {
+  const fallback = buildFallbackResponse({
+    allowlist: new Set(["Elk Hair Caddis", "Pheasant Tail Nymph"]),
+    patternBias: ["Elk Hair Caddis", "Pheasant Tail Nymph"],
+    contextUsed: {
+      weather: {
+        temperature_c: null,
+        precipitation_mm: null,
+        cloud_cover_pct: null,
+        wind_speed_kph: null
+      },
+      daylight: {
+        is_daylight: null,
+        minutes_to_sunset: null
+      }
+    }
+  });
+
+  assert.equal(fallback.primary.pattern, "Elk Hair Caddis");
+});
+
 test("runLlmWithGuardrails logs validation failures when logger provided", async () => {
   const events = [];
   const callLlm = async () => "not json";

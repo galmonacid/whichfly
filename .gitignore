@@ -19,3 +19,6 @@ pnpm-debug.log*
 
 # Local river data sources
 /data/sources/
+
+# Feedback data (local)
+/data/feedback_events.jsonl

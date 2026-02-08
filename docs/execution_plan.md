@@ -352,6 +352,22 @@ Ensure Right now remains the default and primary UI.
 Add minimal tests. Provide Change Summary with tests and rollback notes.
 ```
 
+### [] 7.2 Add mode-specific guidance + bibliography link
+**Goal:** Add short, optional guidance copy for each mode and a link to a bibliography/thanks page.
+- By the riverside: short reminder to read the river before deciding
+- Planning: short prompt to consult books/notes when choosing flies
+- Add a minimal bibliography/thanks page (or link) without affecting core flow
+- Keep copy minimal and avoid product claims
+
+**Task prompt**
+```text
+Add mode-specific guidance copy and a bibliography/thanks link:
+- Short, subtle copy per mode (no blocking UI)
+- Add a minimal bibliography/thanks page or link
+- Keep changes minimal; no new features beyond copy/link
+Provide Change Summary with tests and rollback notes.
+```
+
 ---
 
 ## [DONE] Phase 8 — Feedback Loop (Lightweight)
@@ -372,7 +388,7 @@ Add tests for endpoint validation.
 Provide Change Summary with tests and rollback notes.
 ```
 
-### [] 8.2 Feedback aggregation & learning (no accounts)
+### [DONE] 8.2 Feedback aggregation & learning (no accounts)
 **Goal:** Use feedback as a weak signal to improve reliability without claiming "truth".
 - Add a lightweight aggregation job/script (daily/weekly) that produces summaries:
   - success rate by confidence (high/medium/low)
@@ -401,12 +417,12 @@ Provide Change Summary with tests and rollback notes.
 
 ## [] Phase 9 — Hardening & Release Readiness
 
-### [] 9.1 Observability & error handling
+### [DONE] 9.1 Observability & error handling
 - Structured logs
 - Disable verbose logs in prod
 - Sane error messages to user
 
-### [] 9.2 Performance / offline basics
+### [DONE] 9.2 Performance / offline basics
 - Fast initial load
 - Cache last successful recommendation locally
 - Graceful “no signal” mode

@@ -39,6 +39,9 @@ Response:
 Request:
 - `recommendationId`: string
 - `riverName`: string
+- `riverReachId` (optional): string
+- `pattern` (optional): string
+- `flyType` (optional): `dry | nymph | streamer | wet | emerger`
 - `sessionId`: string (anonymous, stored in local storage)
 - `outcome`: `up | down`
 - `context` (optional):

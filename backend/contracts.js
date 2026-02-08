@@ -13,6 +13,9 @@
  * @typedef {Object} FeedbackRequest
  * @property {string} recommendationId
  * @property {string} riverName
+ * @property {string=} riverReachId
+ * @property {string=} pattern
+ * @property {"dry"|"nymph"|"streamer"|"wet"|"emerger"=} flyType
  * @property {string} sessionId
  * @property {"up"|"down"} outcome
  * @property {{mode?:string, waterLevel?:string, plannedDate?:string, confidence?:string}=} context
@@ -249,6 +252,9 @@ export function validateFeedbackRequest(payload) {
   const allowedKeys = new Set([
     "recommendationId",
     "riverName",
+    "riverReachId",
+    "pattern",
+    "flyType",
     "sessionId",
     "outcome",
     "context"
@@ -265,6 +271,21 @@ export function validateFeedbackRequest(payload) {
 
   if (!payload.riverName || typeof payload.riverName !== "string") {
     errors.push("riverName is required.");
+  }
+
+  if (payload.riverReachId !== undefined && typeof payload.riverReachId !== "string") {
+    errors.push("riverReachId must be a string.");
+  }
+
+  if (payload.pattern !== undefined && typeof payload.pattern !== "string") {
+    errors.push("pattern must be a string.");
+  }
+
+  if (payload.flyType !== undefined) {
+    const allowed = ["dry", "nymph", "streamer", "wet", "emerger"];
+    if (!allowed.includes(payload.flyType)) {
+      errors.push("flyType must be dry, nymph, streamer, wet, or emerger.");
+    }
   }
 
   if (!payload.sessionId || typeof payload.sessionId !== "string") {
