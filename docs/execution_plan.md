@@ -274,7 +274,7 @@ Provide Change Summary with tests and rollback notes.
 ### [DONE] 5.2 Add fly pattern allowlist
 **Goal:** Prevent hallucinated or obscure recommendations.
 - Add docs/FLY_ALLOWLIST.md
-- Backend enforces allowlist
+- Backend enforces allowlist when `ALLOWLIST_ENFORCEMENT=true` (default off)
 - Tests for allowlist violations
 
 ### [DONE] 5.3 Implement LLM guardrails & retry logic
@@ -290,7 +290,7 @@ Provide Change Summary with tests and rollback notes.
 - Uses allowlist
 - No LLM
 
-### [] 5.5 Grounding snippets store (curated, versioned)
+### [PARTIAL] 5.5 Grounding snippets store (curated, versioned)
 **Goal:** Add a controlled knowledge layer for grounding without scraping/quoting.
 - Add `knowledge/` folder with:
   - `knowledge/heuristics/*.yaml` (stable guidance)
@@ -300,6 +300,10 @@ Provide Change Summary with tests and rollback notes.
   - must never introduce hatch claims
 - Add tests for snippet selection and prompt injection safety.
 
+**Status**
+- Implemented: snippets store, loader, deterministic selection (river/season/river_type), load-time validation, tests for selection/limits.
+- Pending: `knowledge/heuristics/` starter content, region-based selection, prompt injection safety tests.
+
 **Task prompt**
 ```text
 Add a curated grounding snippets store and loader:
@@ -308,6 +312,7 @@ Add a curated grounding snippets store and loader:
 - Pass selected snippets to the LLM as background with strict instructions
 - Add tests ensuring snippets cannot override schema/allowlist/guardrails
 Provide Change Summary with tests and rollback notes.
+```
 
 ---
 
@@ -317,7 +322,7 @@ Provide Change Summary with tests and rollback notes.
 **Goal:** LLM produces the recommendation, within guardrails.
 - LLM enabled by default
 - Uses canonical prompt
-- Must comply with schema + allowlist
+- Must comply with schema + allowlist (allowlist enforced when flag on)
 - Confidence returned by model
 - Backend enforces confidence gating
 

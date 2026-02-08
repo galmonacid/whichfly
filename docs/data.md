@@ -22,6 +22,11 @@
 - Filtering (MVP): keep inland rivers, exclude fictitious segments, remove very short or ditch-like names
 - Threshold: `MIN_SUGGESTABLE_LENGTH_M` (default 3000m)
 - TODO: Add NI dataset and rebuild `data/uk_river_reaches.json` for full UK coverage
+- Legacy fallback: `data/uk_rivers_min.json` is used if `data/uk_river_reaches.json` is missing
+- River type lookup: `data/river_types.json` (chalkstream whitelist)
+  - Used to derive `river_type` for snippet selection
+  - Only rivers in the list are treated as chalkstream
+  - Non-listed rivers default to `freestone` (or `mixed` in southern regions when available)
 
 ### Alternatives (not selected)
 - OpenRiversNetwork (GB) provides a connected network and 100m points, but uses ODbL

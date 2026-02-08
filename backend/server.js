@@ -12,6 +12,8 @@ import { runLlmWithGuardrails, buildFallbackResponse } from "./llm_guardrails.js
 import { buildRuntimePrompt, callOpenAiResponses, loadPromptSections, loadResponseSchema } from "./llm_client.js";
 import { loadEnvLocal } from "./env.js";
 import { deriveSeasonFromDate } from "./season.js";
+import { loadGroundingSnippets, selectGroundingSnippets } from "./knowledge.js";
+import { deriveRegionFromCoords, deriveRiverType } from "./river_type.js";
 
 loadEnvLocal();
 
@@ -22,6 +24,7 @@ const frontendDir = path.join(projectRoot, "frontend");
 
 const PORT = Number(process.env.PORT || 3000);
 const FLY_ALLOWLIST = loadFlyAllowlist();
+const GROUNDING_SNIPPETS = loadGroundingSnippets();
 const LLM_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 const LLM_DEBUG = process.env.LLM_DEBUG === "true";
@@ -247,6 +250,22 @@ export function createServer() {
             insects_seen: null
           }
         };
+        // TODO: Derive region from reach metadata when available.
+        const regionFromReach = reachForContext
+          ? deriveRegionFromCoords(reachForContext.lat, reachForContext.lon)
+          : null;
+        const regionFromGps = payload.gps
+          ? deriveRegionFromCoords(payload.gps.lat, payload.gps.lon)
+          : null;
+        const derivedRegion = regionFromReach || regionFromGps;
+        const derivedRiverType = deriveRiverType(river?.name || null, derivedRegion);
+        const snippetContext = {
+          riverId: reachForContext?.river_id || null,
+          riverName: river?.name || null,
+          riverType: derivedRiverType.type,
+          season
+        };
+        const groundingSnippets = selectGroundingSnippets(GROUNDING_SNIPPETS, snippetContext);
 
         const contextUsed = {
           weather: weatherContext
@@ -294,6 +313,7 @@ export function createServer() {
               river,
               inputs,
               context: contextUsed,
+              groundingSnippets,
               mode
             });
 

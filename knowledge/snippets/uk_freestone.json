@@ -1,0 +1,116 @@
+[
+  {
+    "id": "uk_freestone_read_water_over_exact_pattern",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["freestone"],
+      "season": ["spring", "summer", "autumn", "winter"]
+    },
+    "kind": "river_type_guidance",
+    "summary": "On freestone rivers, success is often linked more closely to reading water and adjusting depth and drift than to choosing a highly specific fly pattern.",
+    "confidence": "high",
+    "tags": ["water-reading", "drift", "adaptation"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "guide", "ref": "UK upland freestone river practice" }
+    ],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_freestone_high_flows_focus_edges",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["freestone"],
+      "season": ["spring", "autumn", "winter"]
+    },
+    "kind": "general_guidance",
+    "summary": "During higher or spate flows, freestone anglers often focus on slower edges, pockets, and seams where fish are more likely to hold.",
+    "confidence": "medium",
+    "tags": ["high-water", "edges", "pockets"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "guide", "ref": "UK spate river fishing guidance" }
+    ],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_freestone_colour_allows_more_visibility",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["freestone"],
+      "season": ["spring", "autumn", "winter"]
+    },
+    "kind": "general_guidance",
+    "summary": "When freestone rivers carry some colour, slightly more visible subsurface patterns or increased depth are often considered acceptable without spooking fish.",
+    "confidence": "low",
+    "tags": ["water-colour", "visibility", "subsurface"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "guide", "ref": "UK upland river conditions advice" }
+    ],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_freestone_surface_activity_less_predictable",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["freestone"],
+      "season": ["spring", "summer", "autumn"]
+    },
+    "kind": "angler_reports",
+    "summary": "Surface feeding on freestone rivers is often reported as less predictable than on chalkstreams, making subsurface tactics a frequent starting choice.",
+    "confidence": "low",
+    "tags": ["surface-activity", "predictability", "subsurface"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "forum", "ref": "aggregated UK freestone angler reports" }
+    ],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_freestone_adjust_depth_before_changing_fly",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["freestone"],
+      "season": ["spring", "summer", "autumn", "winter"]
+    },
+    "kind": "general_guidance",
+    "summary": "On freestone rivers, adjusting depth, weight, or drift is often recommended before changing fly pattern when searching for takes.",
+    "confidence": "medium",
+    "tags": ["depth", "weight", "problem-solving"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "guide", "ref": "UK freestone river fishing consensus" }
+    ],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_freestone_cold_conditions_go_deeper",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["freestone"],
+      "season": ["winter", "early-spring"]
+    },
+    "kind": "general_guidance",
+    "summary": "In colder conditions on freestone rivers, trout are often reported to hold deeper and move less, making deeper subsurface presentations a common approach.",
+    "confidence": "low",
+    "tags": ["cold-water", "depth", "winter"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "guide", "ref": "UK cold-water river fishing practice" }
+    ],
+    "created_at": "2026-02-08"
+  }
+]

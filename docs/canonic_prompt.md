@@ -99,7 +99,8 @@ A change without evidence is considered incomplete.
 
 ### Pattern safety
 - All fly patterns MUST come from `docs/FLY_ALLOWLIST.md`
-- Any violation triggers retry → fallback
+- Allowlist enforcement is controlled by `ALLOWLIST_ENFORCEMENT` (default off)
+- Any violation triggers retry → fallback when enforcement is enabled
 
 ### Anti-hallucination rules
 LLM outputs MUST NOT:

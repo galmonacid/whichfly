@@ -6,7 +6,7 @@
 - UK rivers only
 - Trout species only
 - Primary mode: Right now (streamside)
-- UK-wide river dataset with reach-level representative points for context (GB + NI)
+- UK-wide river dataset with reach-level representative points for context (GB now, NI pending)
 
 ---
 

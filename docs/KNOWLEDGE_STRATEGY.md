@@ -79,6 +79,52 @@ All LLM outputs still must validate against:
 
 ---
 
+## Snippet selection rules
+
+Snippets are selected **deterministically** (no embeddings, no semantic search).
+
+1. **Scope filter (hard filter)**
+   - country == UK
+   - `scope.river` is null or exactly matches request river
+   - `scope.river_type` contains request river_type or `unknown`
+   - `scope.season` contains request season or `unknown`
+   - `scope.region` is currently ignored (future use)
+
+2. **Fixed priority by kind**
+   - `safety_note` → `river_type_guidance` → `general_guidance` → `angler_reports`
+
+3. **Strict limits**
+   - Max 4 snippets total
+   - Max 1 `angler_reports` snippet
+
+4. **Selection**
+   - Take 1 `safety_note` if available
+   - Take 1 `river_type_guidance` if available
+   - Fill remaining slots with `general_guidance`
+   - Only if space remains, take 1 `angler_reports`
+   - Within each kind: highest confidence first, then stable id order
+
+Only summary-level fields are passed to the LLM (`id`, `summary`, `confidence`, `tags`). `sources` and `scope` are never passed.
+
+### River type derivation (MVP)
+- Chalkstreams are only assigned via a hard lookup table (`data/river_types.json`).
+- If not in the list:
+  - Southern regions → `mixed` (conservative).
+  - Otherwise → `freestone` (default).
+- If river is unknown → `unknown`.
+- Region is derived from lat/lon using a conservative bounding heuristic (south/south_east only).
+
+### River matching (snippets)
+- Prefer `scope.river_id` over free-text names.
+- On load, snippets are validated against the river dataset:
+  - If `river_id` is provided and missing → error (fail fast).
+  - If `river` is provided, it is normalized and matched:
+    - 0 matches → error
+    - >1 matches → error (ambiguous)
+- Normalization removes “River”, punctuation, and collapses whitespace (e.g. `River Avon (Hampshire)` → `avon hampshire`).
+
+---
+
 ## Evolution path
 
 ### MVP

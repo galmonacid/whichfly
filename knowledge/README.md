@@ -9,6 +9,8 @@ This folder contains curated knowledge used to ground the LLM safely.
   - contracts/right_now.schema.json
   - docs/FLY_ALLOWLIST.md
   - docs/LLM_GUARDRAILS_TESTS.md
+- Allowlist enforcement is controlled by `ALLOWLIST_ENFORCEMENT` (default off).
+- Snippets are validated against the river dataset at load time (fail fast on unknown/ambiguous rivers).
 
 ## Structure
 - `snippets/` — semi-structured curated summaries with metadata

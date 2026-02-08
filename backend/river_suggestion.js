@@ -284,6 +284,7 @@ export function findRiverByName(name, options = {}) {
     lat: match.lat,
     lon: match.lon,
     name: match.river_name,
+    river_id: match.river_id,
     reach_id: match.reach_id,
     reach_label: match.reach_label
   };
@@ -310,6 +311,7 @@ export function findReachById(reachId, options = {}) {
     lat: match.lat,
     lon: match.lon,
     name: match.river_name,
+    river_id: match.river_id,
     reach_id: match.reach_id,
     reach_label: match.reach_label,
     section_label: sectionLabel

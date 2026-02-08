@@ -35,6 +35,7 @@
           "type": "string",
           "enum": ["south", "midlands", "north", "wales", "scotland", "ni", "unknown"]
         },
+        "river_id": { "type": "string", "minLength": 2, "maxLength": 80 },
         "river": {
           "anyOf": [
             { "type": "string", "minLength": 2, "maxLength": 80 },

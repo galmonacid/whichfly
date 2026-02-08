@@ -1,0 +1,116 @@
+[
+  {
+    "id": "uk_chalkstream_presentation_over_pattern",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["chalkstream"],
+      "season": ["spring", "summer", "autumn"]
+    },
+    "kind": "river_type_guidance",
+    "summary": "On chalkstreams, careful presentation, accurate drift, and positioning are widely considered at least as important as the specific fly pattern chosen.",
+    "confidence": "high",
+    "tags": ["presentation", "drift", "accuracy"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "book", "ref": "Oliver Edwards – Chalkstream Fishing" }
+    ],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_chalkstream_clear_water_go_subtle",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["chalkstream"],
+      "season": ["spring", "summer"]
+    },
+    "kind": "general_guidance",
+    "summary": "Because chalkstreams often run clear, subtle presentations, lighter tippets, and smaller or simpler patterns are commonly favoured, especially in bright conditions.",
+    "confidence": "medium",
+    "tags": ["clear-water", "subtlety", "stealth"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "guide", "ref": "UK chalkstream fishing practice" }
+    ],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_chalkstream_observe_before_switching",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["chalkstream"],
+      "season": ["spring", "summer"]
+    },
+    "kind": "general_guidance",
+    "summary": "On chalkstreams, anglers often observe fish behaviour carefully before changing flies; repeated, consistent rises are typically treated as a clearer signal than occasional movement.",
+    "confidence": "medium",
+    "tags": ["observation", "rises", "decision-making"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "book", "ref": "Charles Jardine – River Trout Fishing" }
+    ],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_chalkstream_dont_force_dry_without_rises",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["chalkstream"],
+      "season": ["spring", "summer", "autumn"]
+    },
+    "kind": "general_guidance",
+    "summary": "Even on chalkstreams, forcing dry flies without clear surface feeding is often discouraged; subsurface approaches can remain effective until behaviour changes.",
+    "confidence": "medium",
+    "tags": ["dry-fly", "subsurface", "patience"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "guide", "ref": "General UK chalkstream consensus" }
+    ],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_chalkstream_low_flow_extra_caution",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["chalkstream"],
+      "season": ["summer"]
+    },
+    "kind": "general_guidance",
+    "summary": "During low summer flows, chalkstream trout are often more easily disturbed; careful approach, longer leaders, and reduced disturbance are commonly advised.",
+    "confidence": "medium",
+    "tags": ["low-water", "summer", "approach"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "guide", "ref": "UK chalkstream low-water advice" }
+    ],
+    "created_at": "2026-02-08"
+  },
+  {
+    "id": "uk_chalkstream_last_light_can_change_behaviour",
+    "scope": {
+      "country": "UK",
+      "region": "unknown",
+      "river": null,
+      "river_type": ["chalkstream"],
+      "season": ["spring", "summer"]
+    },
+    "kind": "angler_reports",
+    "summary": "Some anglers report that trout behaviour can change toward last light on chalkstreams, making it worth reassessing surface options if visible feeding begins.",
+    "confidence": "low",
+    "tags": ["evening", "last-light", "behaviour-change"],
+    "use_as": "background_only",
+    "sources": [
+      { "type": "forum", "ref": "aggregated UK chalkstream reports" }
+    ],
+    "created_at": "2026-02-08"
+  }
+]
