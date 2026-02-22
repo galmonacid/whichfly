@@ -29,7 +29,9 @@ jobs:
         run: |
           cd app
           flutter pub get
-          flutter build web --release
+          # Use same-origin API calls via Firebase Hosting rewrite (/api/** -> Cloud Run)
+          # so both *.web.app and *.firebaseapp.com domains work without CORS issues.
+          flutter build web --release --dart-define=API_BASE_URL=/
       - name: Deploy Cloud Run API
         run: |
           gcloud run deploy "${CLOUD_RUN_SERVICE}" \
