@@ -1,6 +1,7 @@
 const RIVER_SOURCES = new Set(["gps_suggested", "user_selected", "unknown"]);
 const CONFIDENCE_LEVELS = new Set(["high", "medium", "low"]);
 const FLY_TYPES = new Set(["dry", "nymph", "streamer", "wet", "emerger"]);
+const RESPONSE_MODES = new Set(["by_the_riverside", "right_now", "planning"]);
 
 function isObject(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -91,8 +92,8 @@ function validateMeta(value, errors) {
   hasOnlyKeys(value, allowedKeys, errors, "meta");
 
   validateString(value.version, "meta.version", errors, { min: 1, max: 20 });
-  if (value.mode !== "right_now" && value.mode !== "planning") {
-    errors.push("meta.mode must be right_now or planning");
+  if (!RESPONSE_MODES.has(value.mode)) {
+    errors.push("meta.mode must be by_the_riverside, right_now, or planning");
   }
 
   if (value.generated_at === undefined) {
@@ -171,7 +172,7 @@ function validateContextUsed(value, errors) {
   }
 }
 
-export function validateRightNowResponse(payload, options = {}) {
+export function validateByTheRiversideResponse(payload, options = {}) {
   const errors = [];
   const allowlist = options.allowlist || null;
 
@@ -253,3 +254,6 @@ export function validateRightNowResponse(payload, options = {}) {
 
   return { ok: errors.length === 0, errors };
 }
+
+// Backward-compatible export name used by existing imports/tests.
+export const validateRightNowResponse = validateByTheRiversideResponse;

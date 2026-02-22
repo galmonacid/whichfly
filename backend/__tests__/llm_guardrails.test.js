@@ -42,7 +42,7 @@ function makeValidResponse() {
     },
     meta: {
       version: "0.1",
-      mode: "right_now",
+      mode: "by_the_riverside",
       generated_at: "2025-06-01T12:00:00.000Z"
     }
   });
@@ -86,7 +86,7 @@ function makeAllowlistViolationResponse() {
     },
     meta: {
       version: "0.1",
-      mode: "right_now",
+      mode: "by_the_riverside",
       generated_at: "2025-06-01T12:00:00.000Z"
     }
   });
@@ -199,7 +199,7 @@ test("runLlmWithGuardrails falls back after forbidden phrase", async () => {
         minutes_to_sunset: null
       }
     },
-    meta: { version: "0.1", mode: "right_now", generated_at: "2025-06-01T12:00:00.000Z" }
+    meta: { version: "0.1", mode: "by_the_riverside", generated_at: "2025-06-01T12:00:00.000Z" }
   });
 };
 
@@ -248,7 +248,7 @@ test("runLlmWithGuardrails rejects source-like claims", async () => {
           minutes_to_sunset: null
         }
       },
-      meta: { version: "0.1", mode: "right_now", generated_at: "2025-06-01T12:00:00.000Z" }
+      meta: { version: "0.1", mode: "by_the_riverside", generated_at: "2025-06-01T12:00:00.000Z" }
     });
   };
 

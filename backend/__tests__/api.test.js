@@ -97,6 +97,23 @@ test("POST /api/recommendation accepts planning payload", async () => {
   assert.equal(data.meta.mode, "planning");
 });
 
+test("POST /api/recommendation accepts legacy right_now mode as alias", async () => {
+  const server = createServer();
+  const response = await request(server, {
+    url: "/api/recommendation",
+    method: "POST",
+    body: {
+      mode: "right_now",
+      waterLevel: "normal",
+      riverName: "River Wye"
+    }
+  });
+
+  assert.equal(response.statusCode, 200);
+  const data = JSON.parse(response.body);
+  assert.equal(data.meta.mode, "by_the_riverside");
+});
+
 test("POST /api/recommendation rejects planning payload without date", async () => {
   const server = createServer();
   const response = await request(server, {
@@ -149,7 +166,7 @@ test("POST /api/feedback accepts a valid payload", async () => {
       sessionId: "sess_abc",
       outcome: "up",
       context: {
-        mode: "right_now",
+        mode: "by_the_riverside",
         waterLevel: "normal",
         confidence: "medium"
       }
@@ -175,4 +192,26 @@ test("POST /api/feedback rejects invalid payload", async () => {
   assert.equal(response.statusCode, 400);
   const data = JSON.parse(response.body);
   assert.equal(data.error, "Invalid request");
+});
+
+test("POST /api/feedback accepts legacy right_now context mode", async () => {
+  const server = createServer();
+  const response = await request(server, {
+    url: "/api/feedback",
+    method: "POST",
+    body: {
+      recommendationId: "rec_456",
+      riverName: "River Test",
+      sessionId: "sess_legacy",
+      outcome: "up",
+      context: {
+        mode: "right_now",
+        waterLevel: "normal"
+      }
+    }
+  });
+
+  assert.equal(response.statusCode, 200);
+  const data = JSON.parse(response.body);
+  assert.equal(data.ok, true);
 });

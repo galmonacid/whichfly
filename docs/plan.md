@@ -78,7 +78,7 @@ Include Change Summary with tests run and results.
 - accuracy optional
 - waterLevel (Low/Normal/High)
 - riverOverride optional (when user changes)
-- mode: right_now or planning (planning can be unused for now)
+- mode: by_the_riverside or planning (planning can be unused for now)
 
 **Response:**
 - river: { name, confidence, distance_m?, source }
@@ -94,7 +94,7 @@ Update mocked response to conform. Add tests for validation errors.
 Keep changes minimal. Provide Change Summary with tests.
 ```
 
-#### [DONE] 1.3 Build the minimal “Right now” UI (no GPS yet)
+#### [DONE] 1.3 Build the minimal “By the riverside” UI (no GPS yet)
 **Goal:** User can pick water level and request a recommendation.
 - Water level selector
 - Button “What should I tie now?”
@@ -102,7 +102,7 @@ Keep changes minimal. Provide Change Summary with tests.
 
 **Task prompt**
 ```text
-Implement the minimal Right now UI:
+Implement the minimal By the riverside UI:
 - water level selector (Low/Normal/High)
 - call /api/recommendation
 - render response fields clearly on mobile
@@ -123,7 +123,7 @@ Provide Change Summary with tests.
 
 **Task prompt**
 ```text
-Add device geolocation capture (lat/lon/accuracy) to the Right now UI.
+Add device geolocation capture (lat/lon/accuracy) to the By the riverside UI.
 Send these fields to /api/recommendation when available.
 If denied/unavailable, proceed without location and show manual river selection placeholder.
 Keep changes minimal. Provide Change Summary with tests.
@@ -271,7 +271,7 @@ Provide Change Summary with tests and rollback notes.
 
 #### [DONE] 5.1 Add LLM response contract (schema)
 **Goal:** Make LLM output machine-safe.
-- Add contracts/right_now.schema.json
+- Add contracts/by_the_riverside.schema.json
 - Enforce strict JSON validation
 - Backend rejects invalid output
 
@@ -341,7 +341,7 @@ Provide Change Summary with tests and rollback notes.
 ### [DONE] Phase 7 — Planning Mode (Secondary)
 
 #### [DONE] 7.1 Add planning UI (secondary entry)
-**Goal:** Keep “Right now” primary; planning is tucked away.
+**Goal:** Keep “By the riverside” primary; planning is tucked away.
 - Link/button: “Planning a trip?”
 - Inputs: date + river (manual)
 - Uses same recommender with “planning” context
@@ -352,7 +352,7 @@ Add a secondary Planning mode:
 - entry link “Planning a trip?”
 - inputs: date + river (manual)
 - call backend with mode=planning and provided date/river
-Ensure Right now remains the default and primary UI.
+Ensure By the riverside remains the default and primary UI.
 Add minimal tests. Provide Change Summary with tests and rollback notes.
 ```
 
@@ -451,7 +451,7 @@ Provide Change Summary with tests and rollback notes.
 - Configure API base URL per environment
 - Keep existing Node backend contract intact
 
-#### [DONE] 10.2 Rebuild Right now flow in Flutter
+#### [DONE] 10.2 Rebuild By the riverside flow in Flutter
 **Goal:** Match current behaviour in iOS and web.
 - Inputs: river, water level, fish rising
 - Geolocation permission flow
@@ -472,7 +472,7 @@ Provide Change Summary with tests and rollback notes.
 ---
 
 ### [] Done criteria (project-level)
-- Right now flow works in < 30 seconds on mobile
+- By the riverside flow works in < 30 seconds on mobile
 - River suggestion is confirmable and correction is easy
 - Recommendations are credible and not overconfident
 - No scope creep: no accounts, payments, or social features in MVP
@@ -484,7 +484,7 @@ Provide Change Summary with tests and rollback notes.
 #### [DONE] 11.1 Run formal parity audit against checklist
 **Goal:** Convert migration status to explicit pass/fail items.
 - Audit Flutter UI and API contract behavior against `docs/FLUTTER_PHASE0_PARITY_CHECKLIST.md`
-- Confirm Right now and Planning flows
+- Confirm By the riverside and Planning flows
 - Identify missing parity items blocking migration closure
 
 **Status**
@@ -495,7 +495,7 @@ Provide Change Summary with tests and rollback notes.
   - `POST /api/feedback`: NOT implemented in Flutter client
   - Schema fixture assertions: pending
 - UI parity:
-  - Right now inputs: OK
+  - By the riverside inputs: OK
   - Planning inputs: OK
   - Recommendation rendering + low-confidence disclaimer: OK
   - Context panel (weather/daylight/input summary): OK
@@ -510,7 +510,7 @@ Provide Change Summary with tests run (if any) and rollback notes.
 
 #### [PARTIAL] 11.2 Add and validate one Flutter integration happy path
 **Goal:** Ensure at least one end-to-end UI flow is covered.
-- Add one integration test for Right now happy path
+- Add one integration test for By the riverside happy path
 - Ensure test can be executed from CI/local commands
 - Keep backend contract unchanged
 
@@ -542,15 +542,15 @@ Provide Change Summary with exact commands, results, and rollback notes.
 
 #### [DONE] 11.3 Add golden fixture assertions for response contract
 **Goal:** Protect backend contract parity from UI regressions.
-- Use `contracts/fixtures/right_now_response.golden.json`
+- Use `contracts/fixtures/by_the_riverside_response.golden.json`
 - Add assertions in Flutter tests that parse and render fixture-compliant payloads
 - Fail clearly on contract drift
 
 **Status**
 - Implemented: `app/test/contract_fixture_test.dart`
 - Coverage added:
-  - Parses `contracts/fixtures/right_now_response.golden.json` and validates contract-critical fields.
-  - Asserts mapped model values from `RightNowRecommendation.fromJson`.
+  - Parses `contracts/fixtures/by_the_riverside_response.golden.json` and validates contract-critical fields.
+  - Asserts mapped model values from `ByTheRiversideRecommendation.fromJson`.
   - Renders fixture-driven response in widget flow and checks UI text/context output.
 - Drift detection:
   - Contract key assertions include explicit failure reasons.
@@ -558,7 +558,7 @@ Provide Change Summary with exact commands, results, and rollback notes.
 
 **Task prompt**
 ```text
-Add Flutter test coverage that validates parsing/rendering against contracts/fixtures/right_now_response.golden.json.
+Add Flutter test coverage that validates parsing/rendering against contracts/fixtures/by_the_riverside_response.golden.json.
 Use minimal wiring and avoid changing backend contracts.
 Ensure tests fail with clear messages on contract drift.
 Provide Change Summary with tests and rollback notes.

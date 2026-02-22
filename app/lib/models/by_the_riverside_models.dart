@@ -140,8 +140,8 @@ class RecommendationContext {
   }
 }
 
-class RightNowRecommendation {
-  const RightNowRecommendation({
+class ByTheRiversideRecommendation {
+  const ByTheRiversideRecommendation({
     required this.riverName,
     required this.primaryPattern,
     required this.primaryType,
@@ -161,13 +161,13 @@ class RightNowRecommendation {
   final List<RecommendationAlternative> alternatives;
   final RecommendationContext context;
 
-  factory RightNowRecommendation.fromJson(Map<String, dynamic> json) {
+  factory ByTheRiversideRecommendation.fromJson(Map<String, dynamic> json) {
     final river = json['river'] as Map<String, dynamic>? ?? <String, dynamic>{};
     final primary =
         json['primary'] as Map<String, dynamic>? ?? <String, dynamic>{};
     final alternatives = json['alternatives'] as List<dynamic>? ?? <dynamic>[];
 
-    return RightNowRecommendation(
+    return ByTheRiversideRecommendation(
       riverName: (river['name'] ?? '').toString(),
       primaryPattern: (primary['pattern'] ?? '').toString(),
       primaryType: (primary['type'] ?? '').toString(),

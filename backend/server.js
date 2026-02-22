@@ -2,11 +2,11 @@ import http from "node:http";
 import { readFile, appendFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { validateFeedbackRequest, validateRightNowRequest } from "./contracts.js";
+import { validateFeedbackRequest, validateByTheRiversideRequest } from "./contracts.js";
 import { fetchWeather, fetchWeatherForecast } from "./weather.js";
 import { fetchDaylight } from "./daylight.js";
 import { findReachById, findRiverByName, listRiverOptions, suggestRiverWithReach } from "./river_suggestion.js";
-import { validateRightNowResponse } from "./llm_validation.js";
+import { validateByTheRiversideResponse } from "./llm_validation.js";
 import { loadFlyAllowlist } from "./allowlist.js";
 import { runLlmWithGuardrails, buildFallbackResponse } from "./llm_guardrails.js";
 import { buildRuntimePrompt, callOpenAiResponses, loadPromptSections, loadResponseSchema } from "./llm_client.js";
@@ -51,6 +51,33 @@ const DAYLIGHT_API_BASE_URL = process.env.DAYLIGHT_API_BASE_URL || "https://api.
 void WEATHER_API_BASE_URL;
 void DAYLIGHT_API_BASE_URL;
 
+function getAllowedCorsOrigin(origin) {
+  if (!origin) {
+    return null;
+  }
+
+  if (!IS_PROD && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) {
+    return origin;
+  }
+
+  return null;
+}
+
+function applyApiCors(req, res) {
+  const origin = req.headers.origin;
+  const allowedOrigin = getAllowedCorsOrigin(origin);
+  if (!allowedOrigin) {
+    return false;
+  }
+
+  res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
+  res.setHeader("Vary", "Origin");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Max-Age", "86400");
+  return true;
+}
+
 function getOpenAiApiKey() {
   return process.env.OPENAI_API_KEY || "";
 }
@@ -93,7 +120,7 @@ const MOCK_RECOMMENDATION = {
   ],
   meta: {
     version: "0.1",
-    mode: "right_now"
+    mode: "by_the_riverside"
   }
 };
 
@@ -170,6 +197,15 @@ export function createServer() {
       return;
     }
 
+    if (req.url.startsWith("/api/")) {
+      applyApiCors(req, res);
+      if (req.method === "OPTIONS") {
+        res.writeHead(204);
+        res.end();
+        return;
+      }
+    }
+
     if (req.url === "/api/recommendation") {
       if (req.method !== "POST") {
         json(res, 405, { error: "Method not allowed" });
@@ -190,14 +226,14 @@ export function createServer() {
           return;
         }
 
-        const validation = validateRightNowRequest(payload);
+        const validation = validateByTheRiversideRequest(payload);
         if (!validation.ok) {
           logEvent("request_validation_failed", { path: req.url });
           json(res, 400, { error: "Invalid request", details: validation.errors });
           return;
         }
 
-        const mode = payload.mode || "right_now";
+        const mode = validation.mode || "by_the_riverside";
         let river = MOCK_RECOMMENDATION.river;
         let weatherContext = null;
         let daylightContext = null;
@@ -464,7 +500,7 @@ export function createServer() {
           mode
         };
 
-        const outputValidation = validateRightNowResponse(responsePayload, {
+        const outputValidation = validateByTheRiversideResponse(responsePayload, {
           allowlist: ALLOWLIST_ENFORCEMENT ? FLY_ALLOWLIST : null
         });
         if (!outputValidation.ok) {

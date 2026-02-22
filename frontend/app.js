@@ -18,7 +18,7 @@ const planningCardEl = document.getElementById("planningCard");
 const planningDateInput = document.getElementById("planningDate");
 const planningRiverSelect = document.getElementById("planningRiver");
 const planningButton = document.getElementById("getPlanningRecommendation");
-const rightNowCardEl = document.getElementById("rightNowCard");
+const byTheRiversideCardEl = document.getElementById("byTheRiversideCard");
 const feedbackPanelEl = document.getElementById("feedbackPanel");
 const feedbackYesBtn = document.getElementById("feedbackYes");
 const feedbackNoBtn = document.getElementById("feedbackNo");
@@ -182,7 +182,7 @@ function applyRecommendation(data, { inputs, cachedAt } = {}) {
     riverName: data.river?.name || inputs?.riverName || "Unknown",
     riverLabel: responseRiverLabel,
     riverReachId: inputs?.riverReachId || null,
-    mode: data.meta?.mode || inputs?.mode || "right_now",
+    mode: data.meta?.mode || inputs?.mode || "by_the_riverside",
     waterLevel: inputs?.waterLevel || null,
     plannedDate: inputs?.plannedDate || null,
     confidence: data.confidence,
@@ -375,7 +375,7 @@ async function fetchRecommendation() {
       riverName,
       riverLabel: selectedRiverLabel,
       riverReachId: selectedOption?.reach_id || null,
-      mode: "right_now",
+      mode: "by_the_riverside",
       waterLevel: waterLevelSelect.value,
       plannedDate: null,
       fishRising: fishRisingSelect.value
@@ -462,14 +462,14 @@ planningButton.addEventListener("click", fetchPlanningRecommendation);
 function setMode(mode) {
   const isPlanning = mode === "planning";
   planningCardEl.classList.toggle("hidden", !isPlanning);
-  rightNowCardEl.classList.toggle("hidden", isPlanning);
+  byTheRiversideCardEl.classList.toggle("hidden", isPlanning);
   modePlanningBtn.classList.toggle("active", isPlanning);
   modeRiversideBtn.classList.toggle("active", !isPlanning);
   modePlanningBtn.setAttribute("aria-selected", String(isPlanning));
   modeRiversideBtn.setAttribute("aria-selected", String(!isPlanning));
 }
 
-modeRiversideBtn.addEventListener("click", () => setMode("right_now"));
+modeRiversideBtn.addEventListener("click", () => setMode("by_the_riverside"));
 modePlanningBtn.addEventListener("click", () => setMode("planning"));
 toggleContextBtn.addEventListener("click", () => {
   const isHidden = contextPanelEl.classList.contains("hidden");
@@ -484,4 +484,4 @@ if (feedbackNoBtn) {
 }
 requestLocation();
 loadRiverOptions();
-setMode("right_now");
+setMode("by_the_riverside");

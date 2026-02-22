@@ -5,14 +5,14 @@
 - Flutter app with shared codebase for iOS + web
 - UK rivers only
 - Trout species only
-- Primary mode: Right now (streamside)
+- Primary mode: By the riverside (streamside)
 - UK-wide river dataset with reach-level representative points for context (GB now, NI pending)
 
 ---
 
 ## Inputs
 
-### By the riverside (Right now, default)
+### By the riverside (default)
 - Device location (GPS, optional)
 - Water level (manual: Low / Normal / High)
 - Optional observation: fish rising (Yes / No / Not sure)

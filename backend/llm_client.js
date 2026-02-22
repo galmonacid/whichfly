@@ -7,7 +7,7 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, "..");
 
 const promptPath = path.resolve(projectRoot, "docs", "LLM_AGENT_PROMPT.md");
-const schemaPath = path.resolve(projectRoot, "contracts", "right_now.schema.json");
+const schemaPath = path.resolve(projectRoot, "contracts", "by_the_riverside.schema.json");
 
 export function loadPromptSections() {
   const content = readFileSync(promptPath, "utf-8");
@@ -40,7 +40,7 @@ export function loadResponseSchema() {
 
 export function buildRuntimePrompt({ river, inputs, context, groundingSnippets, mode }) {
   const prompt = {
-    mode: mode || "right_now",
+    mode: mode || "by_the_riverside",
     river,
     inputs,
     context
@@ -107,7 +107,7 @@ export async function callOpenAiResponses({
         text: {
           format: {
             type: "json_schema",
-            name: "right_now_response",
+            name: "by_the_riverside_response",
             strict: true,
             schema
           }

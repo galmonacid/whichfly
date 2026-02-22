@@ -3,14 +3,14 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../config/app_config.dart';
-import '../models/right_now_models.dart';
+import '../models/by_the_riverside_models.dart';
 
 abstract class WhichFlyApi {
   Future<List<RiverOption>> fetchRiverOptions();
 
   Future<RiverSuggestion> suggestRiver({required GpsCoords gps});
 
-  Future<RightNowRecommendation> fetchRightNowRecommendation({
+  Future<ByTheRiversideRecommendation> fetchByTheRiversideRecommendation({
     required String riverName,
     String? riverReachId,
     required String waterLevel,
@@ -18,7 +18,7 @@ abstract class WhichFlyApi {
     bool? fishRising,
   });
 
-  Future<RightNowRecommendation> fetchPlanningRecommendation({
+  Future<ByTheRiversideRecommendation> fetchPlanningRecommendation({
     required String riverName,
     String? riverReachId,
     required String plannedDate,
@@ -87,7 +87,7 @@ class HttpWhichFlyApi implements WhichFlyApi {
   }
 
   @override
-  Future<RightNowRecommendation> fetchRightNowRecommendation({
+  Future<ByTheRiversideRecommendation> fetchByTheRiversideRecommendation({
     required String riverName,
     String? riverReachId,
     required String waterLevel,
@@ -131,11 +131,11 @@ class HttpWhichFlyApi implements WhichFlyApi {
     }
 
     final json = jsonDecode(response.body) as Map<String, dynamic>;
-    return RightNowRecommendation.fromJson(json);
+    return ByTheRiversideRecommendation.fromJson(json);
   }
 
   @override
-  Future<RightNowRecommendation> fetchPlanningRecommendation({
+  Future<ByTheRiversideRecommendation> fetchPlanningRecommendation({
     required String riverName,
     String? riverReachId,
     required String plannedDate,
@@ -174,6 +174,6 @@ class HttpWhichFlyApi implements WhichFlyApi {
     }
 
     final json = jsonDecode(response.body) as Map<String, dynamic>;
-    return RightNowRecommendation.fromJson(json);
+    return ByTheRiversideRecommendation.fromJson(json);
   }
 }

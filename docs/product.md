@@ -18,7 +18,7 @@ whichFly is a **streamside decision-support tool**.
 
 ---
 
-## Primary usage mode: By the riverside (Right now)
+## Primary usage mode: By the riverside
 
 - User is physically at the river
 - Date and time are implicit (now)

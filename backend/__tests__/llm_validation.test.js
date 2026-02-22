@@ -1,8 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { validateRightNowResponse } from "../llm_validation.js";
+import { validateByTheRiversideResponse } from "../llm_validation.js";
 
-test("validateRightNowResponse accepts a valid response", () => {
+test("validateByTheRiversideResponse accepts a valid response", () => {
   const payload = {
     river: {
       name: "River Wye",
@@ -40,16 +40,16 @@ test("validateRightNowResponse accepts a valid response", () => {
     },
     meta: {
       version: "0.1",
-      mode: "right_now",
+      mode: "by_the_riverside",
       generated_at: "2025-06-01T12:00:00.000Z"
     }
   };
 
-  const result = validateRightNowResponse(payload);
+  const result = validateByTheRiversideResponse(payload);
   assert.equal(result.ok, true);
 });
 
-test("validateRightNowResponse rejects missing required fields", () => {
+test("validateByTheRiversideResponse rejects missing required fields", () => {
   const payload = {
     river: {
       name: "River Wye",
@@ -59,13 +59,13 @@ test("validateRightNowResponse rejects missing required fields", () => {
     }
   };
 
-  const result = validateRightNowResponse(payload);
+  const result = validateByTheRiversideResponse(payload);
   assert.equal(result.ok, false);
   assert.ok(result.errors.some((error) => error.includes("response.primary is required")));
   assert.ok(result.errors.some((error) => error.includes("context_used is required")));
 });
 
-test("validateRightNowResponse rejects patterns not in allowlist", () => {
+test("validateByTheRiversideResponse rejects patterns not in allowlist", () => {
   const payload = {
     river: {
       name: "River Wye",
@@ -90,13 +90,13 @@ test("validateRightNowResponse rejects patterns not in allowlist", () => {
     confidence_reasons: ["Generic river suggestion only"],
     meta: {
       version: "0.1",
-      mode: "right_now",
+      mode: "by_the_riverside",
       generated_at: "2025-06-01T12:00:00.000Z"
     }
   };
 
   const allowlist = new Set(["Elk Hair Caddis"]);
-  const result = validateRightNowResponse(payload, { allowlist });
+  const result = validateByTheRiversideResponse(payload, { allowlist });
   assert.equal(result.ok, false);
   assert.ok(result.errors.some((error) => error.includes("primary.pattern not in allowlist")));
 });

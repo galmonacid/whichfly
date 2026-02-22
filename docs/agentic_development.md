@@ -60,7 +60,7 @@ High-risk areas include:
 - AI prompts or reasoning
 - External API usage
 - External datasets or licensing changes
-- Anything affecting “Right now” UX
+- Anything affecting “By the riverside” UX
 
 Risky changes require:
 - Explicit reasoning

@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:whichfly_app/main.dart';
-import 'package:whichfly_app/models/right_now_models.dart';
+import 'package:whichfly_app/models/by_the_riverside_models.dart';
 import 'package:whichfly_app/services/location_service.dart';
 import 'package:whichfly_app/services/whichfly_api.dart';
 
@@ -20,11 +20,13 @@ class FakeWhichFlyApi implements WhichFlyApi {
     required this.options,
     required this.suggestion,
     required this.recommendation,
+    this.failRiverOptions = false,
   });
 
   final List<RiverOption> options;
   final RiverSuggestion suggestion;
-  final RightNowRecommendation recommendation;
+  final ByTheRiversideRecommendation recommendation;
+  final bool failRiverOptions;
 
   String? lastRiverName;
   String? lastRiverReachId;
@@ -37,10 +39,15 @@ class FakeWhichFlyApi implements WhichFlyApi {
   String? lastPlanningDate;
 
   @override
-  Future<List<RiverOption>> fetchRiverOptions() async => options;
+  Future<List<RiverOption>> fetchRiverOptions() async {
+    if (failRiverOptions) {
+      throw const ApiException('Unable to load river options.');
+    }
+    return options;
+  }
 
   @override
-  Future<RightNowRecommendation> fetchRightNowRecommendation({
+  Future<ByTheRiversideRecommendation> fetchByTheRiversideRecommendation({
     required String riverName,
     String? riverReachId,
     required String waterLevel,
@@ -56,7 +63,7 @@ class FakeWhichFlyApi implements WhichFlyApi {
   }
 
   @override
-  Future<RightNowRecommendation> fetchPlanningRecommendation({
+  Future<ByTheRiversideRecommendation> fetchPlanningRecommendation({
     required String riverName,
     String? riverReachId,
     required String plannedDate,
@@ -151,7 +158,7 @@ void main() {
     );
   });
 
-  testWidgets('loads and renders right now recommendation after confirm', (
+  testWidgets('loads and renders by the riverside recommendation after confirm', (
     WidgetTester tester,
   ) async {
     final api = FakeWhichFlyApi(
@@ -220,6 +227,91 @@ void main() {
     expect(api.lastGps, isNotNull);
   });
 
+  testWidgets('falls back to manual selector when GPS suggestion is unknown', (
+    WidgetTester tester,
+  ) async {
+    final api = FakeWhichFlyApi(
+      options: const [
+        RiverOption(
+          label: 'River Test - Upper section',
+          riverName: 'River Test',
+          reachId: 'river_test_upper',
+        ),
+      ],
+      suggestion: const RiverSuggestion(
+        name: 'Unknown',
+        confidence: 'low',
+        distanceM: null,
+        source: 'unknown',
+      ),
+      recommendation: _sampleRecommendation,
+    );
+    final location = FakeLocationService(
+      const LocationOutcome(
+        gps: GpsCoords(lat: 40.4168, lon: -3.7038, accuracy: 35),
+        message: 'Location acquired.',
+      ),
+    );
+
+    await tester.pumpWidget(WhichFlyApp(api: api, locationService: location));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'No nearby UK river found from location. Select a river manually.',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('manualRiverDropdown')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('confirmRiverButton')),
+      findsNothing,
+    );
+  });
+
+  testWidgets('shows river catalog retry when options fail to load', (
+    WidgetTester tester,
+  ) async {
+    final api = FakeWhichFlyApi(
+      options: const [],
+      suggestion: const RiverSuggestion(
+        name: '',
+        confidence: 'low',
+        distanceM: null,
+        source: 'unknown',
+      ),
+      recommendation: _sampleRecommendation,
+      failRiverOptions: true,
+    );
+    final location = FakeLocationService(
+      const LocationOutcome(
+        gps: null,
+        message: 'Location denied. Select a river manually.',
+      ),
+    );
+
+    await tester.pumpWidget(WhichFlyApp(api: api, locationService: location));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey<String>('manualRiverTextField')),
+      findsOneWidget,
+    );
+    expect(
+      find.text(
+        'Unable to load river catalog. Check API connection and retry.',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('retryRiverOptionsButton')),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('loads planning recommendation in planning mode', (
     WidgetTester tester,
   ) async {
@@ -277,7 +369,8 @@ void main() {
   });
 }
 
-const RightNowRecommendation _sampleRecommendation = RightNowRecommendation(
+const ByTheRiversideRecommendation
+_sampleRecommendation = ByTheRiversideRecommendation(
   riverName: 'River Test',
   primaryPattern: 'Pheasant Tail Nymph',
   primaryType: 'nymph',

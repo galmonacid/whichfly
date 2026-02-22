@@ -49,10 +49,10 @@ test("buildRuntimePrompt caps grounding_snippets and omits allowlist", () => {
       { id: "5" },
       { id: "6" }
     ],
-    mode: "right_now"
+    mode: "by_the_riverside"
   });
 
-  assert.equal(prompt.mode, "right_now");
+  assert.equal(prompt.mode, "by_the_riverside");
   assert.ok(Array.isArray(prompt.grounding_snippets));
   assert.equal(prompt.grounding_snippets.length, 5);
   assert.equal("allowlist" in prompt, false);

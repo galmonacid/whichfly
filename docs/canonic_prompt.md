@@ -30,7 +30,7 @@ Before implementing any non-trivial change, agents MUST read and respect:
 - `DATA.md`
 
 ### LLM contracts & guardrails
-- `contracts/right_now.schema.json`
+- `contracts/by_the_riverside.schema.json`
 - `docs/FLY_ALLOWLIST.md`
 - `docs/LLM_GUARDRAILS_TESTS.md`
 - `docs/LLM_AGENT_PROMPT.md`
@@ -92,7 +92,7 @@ A change without evidence is considered incomplete.
 ### Output validation
 - All LLM outputs MUST:
   - be JSON-only
-  - validate against `contracts/right_now.schema.json`
+  - validate against `contracts/by_the_riverside.schema.json`
 - Invalid output triggers:
   - one retry with correction message
   - fallback on second failure
@@ -139,7 +139,7 @@ The following changes require extra care, tests, and rollback clarity:
 - Allowlist changes
 - Recommendation logic
 - External API integration
-- Anything affecting the “Right now” user flow
+- Anything affecting the “By the riverside” user flow
 
 For these changes, agents MUST:
 - Explain reasoning explicitly

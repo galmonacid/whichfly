@@ -13,7 +13,7 @@ The goal: preserve user trust by preventing invalid, unsafe, or hallucinated rec
 - If it fails again, fallback.
 
 ### 2) Schema validation
-- Validate output against `contracts/right_now.schema.json`.
+- Validate output against `contracts/by_the_riverside.schema.json`.
 - If invalid → retry once → fallback.
 
 ### 3) Pattern allowlist enforcement
@@ -111,7 +111,7 @@ Example:
   "event": "allowlist_violation",
   "pattern": "MagicMayfly9000",
   "action": "fallback_used",
-  "mode": "right_now"
+  "mode": "by_the_riverside"
 }
 ```
 

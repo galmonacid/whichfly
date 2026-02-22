@@ -6,11 +6,11 @@
   - `GET /api/rivers`
   - `POST /api/river-suggestion`
   - `POST /api/feedback`
-- Keep request/response schema unchanged (`contracts/right_now.schema.json`).
-- Keep mode behavior unchanged (`right_now` default, `planning` secondary).
+- Keep request/response schema unchanged (`contracts/by_the_riverside.schema.json`).
+- Keep mode behavior unchanged (`by_the_riverside` default, `planning` secondary).
 
 ## UI parity checklist (to be implemented in Phases 10.2/10.3)
-- Right now inputs:
+- By the riverside inputs:
   - River suggestion + confirm/change
   - Water level
   - Optional fish rising observation
@@ -29,7 +29,7 @@
   - Input context summary
 
 ## Golden fixtures
-- `contracts/fixtures/right_now_response.golden.json`
+- `contracts/fixtures/by_the_riverside_response.golden.json`
 
 ## Notes
 - Tracking is centralized in `docs/plan.md` (Phase 11).

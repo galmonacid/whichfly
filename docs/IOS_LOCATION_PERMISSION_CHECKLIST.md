@@ -1,6 +1,6 @@
 # iOS Location Permission Flow Checklist (Flutter)
 
-This checklist verifies iOS permission UX behavior for `GeolocatorLocationService` and the Right now flow.
+This checklist verifies iOS permission UX behavior for `GeolocatorLocationService` and the By the riverside flow.
 
 ## Scope
 - Permission UX only.

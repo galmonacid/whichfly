@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const indexPath = path.resolve(__dirname, "..", "index.html");
 
-test("index.html includes Right now flow", async () => {
+test("index.html includes by-the-riverside flow", async () => {
   const html = await readFile(indexPath, "utf-8");
   assert.match(html, /By the riverside/i);
   assert.match(html, /Get fly recommendation/i);

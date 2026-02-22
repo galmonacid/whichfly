@@ -1,4 +1,4 @@
-import { validateRightNowResponse } from "./llm_validation.js";
+import { validateByTheRiversideResponse } from "./llm_validation.js";
 
 const FORBIDDEN_PHRASES = [
   /hatch is on/i,
@@ -83,7 +83,7 @@ export function buildFallbackResponse({
     },
     meta: {
       version: "0.1",
-      mode: "right_now",
+      mode: "by_the_riverside",
       generated_at: generatedAt || new Date().toISOString()
     }
   };
@@ -115,7 +115,7 @@ function validateOutput(candidate, allowlist, enforceAllowlist) {
     ? collectAllowlistViolations(candidate, allowlist)
     : [];
 
-  const validation = validateRightNowResponse(candidate, {
+  const validation = validateByTheRiversideResponse(candidate, {
     allowlist: enforceAllowlist ? allowlist : null
   });
   if (!validation.ok) {
@@ -183,29 +183,29 @@ export async function runLlmWithGuardrails({
       log("allowlist_violation", {
         patterns: validation.allowlistViolations,
         action: attempt === 0 ? "retry" : "fallback_used",
-        mode: mode || "right_now"
+        mode: mode || "by_the_riverside"
       });
       log("pattern_rejected", {
         patterns: validation.allowlistViolations,
-        mode: mode || "right_now"
+        mode: mode || "by_the_riverside"
       });
     }
 
     if (validation.forbiddenPhraseDetected) {
       log("forbidden_phrase_detected", {
         action: attempt === 0 ? "retry" : "fallback_used",
-        mode: mode || "right_now"
+        mode: mode || "by_the_riverside"
       });
     }
 
     log("llm_output_failed_validation", { attempt, errors: validation.errors });
     if (attempt === 0) {
-      log("retry_triggered", { reason: "validation_failed", attempt: 1, mode: mode || "right_now" });
+      log("retry_triggered", { reason: "validation_failed", attempt: 1, mode: mode || "by_the_riverside" });
     }
   }
 
   log("llm_output_fallback", { reason: "invalid_or_missing_output" });
-  log("fallback_used", { reason: "invalid_or_missing_output", mode: mode || "right_now" });
+  log("fallback_used", { reason: "invalid_or_missing_output", mode: mode || "by_the_riverside" });
   return {
     ok: false,
     response: buildFallbackResponse({ river, generatedAt, allowlist, contextUsed, patternBias }),

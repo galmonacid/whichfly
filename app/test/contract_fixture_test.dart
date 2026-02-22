@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whichfly_app/main.dart';
-import 'package:whichfly_app/models/right_now_models.dart';
+import 'package:whichfly_app/models/by_the_riverside_models.dart';
 import 'package:whichfly_app/services/location_service.dart';
 import 'package:whichfly_app/services/whichfly_api.dart';
 
@@ -26,13 +26,13 @@ class _FakeWhichFlyApi implements WhichFlyApi {
 
   final List<RiverOption> options;
   final RiverSuggestion suggestion;
-  final RightNowRecommendation recommendation;
+  final ByTheRiversideRecommendation recommendation;
 
   @override
   Future<List<RiverOption>> fetchRiverOptions() async => options;
 
   @override
-  Future<RightNowRecommendation> fetchRightNowRecommendation({
+  Future<ByTheRiversideRecommendation> fetchByTheRiversideRecommendation({
     required String riverName,
     String? riverReachId,
     required String waterLevel,
@@ -41,7 +41,7 @@ class _FakeWhichFlyApi implements WhichFlyApi {
   }) async => recommendation;
 
   @override
-  Future<RightNowRecommendation> fetchPlanningRecommendation({
+  Future<ByTheRiversideRecommendation> fetchPlanningRecommendation({
     required String riverName,
     String? riverReachId,
     required String plannedDate,
@@ -53,20 +53,23 @@ class _FakeWhichFlyApi implements WhichFlyApi {
 }
 
 Future<Map<String, dynamic>> _loadGoldenResponseFixture() async {
-  final file = File('../contracts/fixtures/right_now_response.golden.json');
+  final file = File(
+    '../contracts/fixtures/by_the_riverside_response.golden.json',
+  );
   final exists = await file.exists();
   expect(
     exists,
     isTrue,
     reason:
-        'Missing contract fixture at contracts/fixtures/right_now_response.golden.json',
+        'Missing contract fixture at contracts/fixtures/by_the_riverside_response.golden.json',
   );
 
   final decoded = jsonDecode(await file.readAsString());
   expect(
     decoded,
     isA<Map<String, dynamic>>(),
-    reason: 'Fixture must be a JSON object matching RightNowResponse schema.',
+    reason:
+        'Fixture must be a JSON object matching ByTheRiversideResponse schema.',
   );
 
   return (decoded as Map<dynamic, dynamic>).cast<String, dynamic>();
@@ -81,11 +84,11 @@ Future<void> _drainFrames(WidgetTester tester) async {
 
 void main() {
   late Map<String, dynamic> goldenFixture;
-  late RightNowRecommendation goldenRecommendation;
+  late ByTheRiversideRecommendation goldenRecommendation;
 
   setUpAll(() async {
     goldenFixture = await _loadGoldenResponseFixture();
-    goldenRecommendation = RightNowRecommendation.fromJson(goldenFixture);
+    goldenRecommendation = ByTheRiversideRecommendation.fromJson(goldenFixture);
   });
 
   test('golden response fixture parses with contract-critical fields', () async {
@@ -162,11 +165,12 @@ void main() {
     expect(
       parsed.context.daylight.minutesToSunset,
       95,
-      reason: 'Fixture drift: expected context_used.daylight.minutes_to_sunset.',
+      reason:
+          'Fixture drift: expected context_used.daylight.minutes_to_sunset.',
     );
   });
 
-  testWidgets('golden response fixture renders in right-now UI', (
+  testWidgets('golden response fixture renders in by-the-riverside UI', (
     WidgetTester tester,
   ) async {
     final api = _FakeWhichFlyApi(
@@ -217,9 +221,12 @@ void main() {
       reason: 'Render drift: primary pattern text not rendered from fixture.',
     );
     expect(
-      find.text('Parachute Adams (dry, size 16) If fish start rising near the surface'),
+      find.text(
+        'Parachute Adams (dry, size 16) If fish start rising near the surface',
+      ),
       findsOneWidget,
-      reason: 'Render drift: second alternative text not rendered from fixture.',
+      reason:
+          'Render drift: second alternative text not rendered from fixture.',
     );
     expect(
       find.textContaining('A proven nymph pattern is a conservative default'),

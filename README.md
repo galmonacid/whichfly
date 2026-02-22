@@ -2,7 +2,7 @@
 
 **whichFly** helps fly fishers answer one simple question:
 
-> *Which fly should I tie right now, here?*
+> *Which fly should I tie by the riverside, here?*
 
 Built for trout fishing on UK rivers, whichFly is designed to be used **at the river**, when the decision actually matters.
 

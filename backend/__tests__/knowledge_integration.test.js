@@ -54,7 +54,7 @@ test("knowledge pipeline produces runtime prompt with capped snippets", () => {
     inputs: { water_level: "Normal" },
     context: { weather: {}, daylight: {} },
     groundingSnippets: selected,
-    mode: "right_now"
+    mode: "by_the_riverside"
   });
 
   assert.ok(Array.isArray(prompt.grounding_snippets));

@@ -74,7 +74,7 @@ function makeValidModelResponse() {
               },
               meta: {
                 version: "0.1",
-                mode: "right_now",
+                mode: "by_the_riverside",
                 generated_at: "2026-02-08T12:00:00.000Z"
               }
             })

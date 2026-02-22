@@ -1,11 +1,16 @@
+const MODE_BY_THE_RIVERSIDE = "by_the_riverside";
+const MODE_RIGHT_NOW_LEGACY = "right_now";
+const MODE_PLANNING = "planning";
+const MODE_REQUEST_ALLOWED = [MODE_BY_THE_RIVERSIDE, MODE_PLANNING, MODE_RIGHT_NOW_LEGACY];
+const MODE_RESPONSE_ALLOWED = [MODE_BY_THE_RIVERSIDE, MODE_PLANNING, MODE_RIGHT_NOW_LEGACY];
+
 /**
- * @typedef {Object} RightNowRequest
+ * @typedef {Object} ByTheRiversideRequest
  * @property {{lat:number, lon:number, accuracy:number=}=} gps
  * @property {string=} riverName
  * @property {string=} riverReachId
  * @property {{fishRising:(boolean|null)=}=} observations
- * @property {"low"|"normal"|"high"} waterLevel
- * @property {"right_now"|"planning"=} mode
+ * @property {"by_the_riverside"|"planning"|"right_now"=} mode
  * @property {string=} plannedDate
  */
 
@@ -29,7 +34,7 @@
  */
 
 /**
- * @typedef {Object} RightNowResponse
+ * @typedef {Object} ByTheRiversideResponse
  * @property {{name:string, source:"gps_suggested"|"user_selected"|"unknown", confidence:"high"|"medium"|"low", distance_m:number|null}} river
  * @property {FlyChoice} primary
  * @property {{when:string, pattern:string, type:"dry"|"nymph"|"streamer"|"wet"|"emerger", size:number}[]} alternatives
@@ -37,10 +42,17 @@
  * @property {"high"|"medium"|"low"} confidence
  * @property {string[]} confidence_reasons
  * @property {{weather:{temperature_c:number|null, precipitation_mm:number|null, cloud_cover_pct:number|null, wind_speed_kph:number|null}, daylight:{is_daylight:boolean|null, minutes_to_sunset:number|null}}} context_used
- * @property {{version:string, mode:"right_now"|"planning", generated_at:string}} meta
+ * @property {{version:string, mode:"by_the_riverside"|"planning"|"right_now", generated_at:string}} meta
  */
 
-export const rightNowRequestSchema = {
+function normalizeRecommendationMode(mode) {
+  if (!mode || mode === MODE_RIGHT_NOW_LEGACY) {
+    return MODE_BY_THE_RIVERSIDE;
+  }
+  return mode;
+}
+
+export const byTheRiversideRequestSchema = {
   type: "object",
   required: [],
   additionalProperties: false,
@@ -58,7 +70,7 @@ export const rightNowRequestSchema = {
     riverName: { type: "string" },
     riverReachId: { type: "string" },
     plannedDate: { type: "string" },
-    mode: { type: "string", enum: ["right_now", "planning"] },
+    mode: { type: "string", enum: MODE_REQUEST_ALLOWED },
     observations: {
       type: "object",
       required: [],
@@ -71,7 +83,7 @@ export const rightNowRequestSchema = {
   }
 };
 
-export const rightNowResponseSchema = {
+export const byTheRiversideResponseSchema = {
   type: "object",
   required: ["river", "primary", "alternatives", "explanation", "confidence", "confidence_reasons", "context_used", "meta"],
   additionalProperties: false,
@@ -147,14 +159,14 @@ export const rightNowResponseSchema = {
       additionalProperties: false,
       properties: {
         version: { type: "string" },
-        mode: { type: "string", enum: ["right_now", "planning"] },
+        mode: { type: "string", enum: MODE_RESPONSE_ALLOWED },
         generated_at: { type: "string" }
       }
     }
   }
 };
 
-export function validateRightNowRequest(payload) {
+export function validateByTheRiversideRequest(payload) {
   const errors = [];
 
   if (!payload || typeof payload !== "object") {
@@ -176,18 +188,18 @@ export function validateRightNowRequest(payload) {
     }
   }
 
-  const mode = payload.mode || "right_now";
-  if (payload.mode && !rightNowRequestSchema.properties.mode.enum.includes(payload.mode)) {
-    errors.push("mode must be right_now or planning.");
+  const mode = normalizeRecommendationMode(payload.mode);
+  if (payload.mode && !byTheRiversideRequestSchema.properties.mode.enum.includes(payload.mode)) {
+    errors.push("mode must be by_the_riverside, right_now, or planning.");
   }
 
-  if (mode === "right_now") {
+  if (mode === MODE_BY_THE_RIVERSIDE) {
     if (!payload.waterLevel || typeof payload.waterLevel !== "string") {
       errors.push("waterLevel is required.");
-    } else if (!rightNowRequestSchema.properties.waterLevel.enum.includes(payload.waterLevel)) {
+    } else if (!byTheRiversideRequestSchema.properties.waterLevel.enum.includes(payload.waterLevel)) {
       errors.push("waterLevel must be low, normal, or high.");
     }
-  } else if (mode === "planning") {
+  } else if (mode === MODE_PLANNING) {
     if (!payload.riverName) {
       errors.push("riverName is required for planning mode.");
     }
@@ -239,7 +251,7 @@ export function validateRightNowRequest(payload) {
     }
   }
 
-  return { ok: errors.length === 0, errors };
+  return { ok: errors.length === 0, errors, mode };
 }
 
 export function validateFeedbackRequest(payload) {
@@ -304,8 +316,8 @@ export function validateFeedbackRequest(payload) {
       if (Object.keys(rest).length > 0) {
         errors.push("context only allows mode, waterLevel, plannedDate, confidence.");
       }
-      if (mode !== undefined && !["right_now", "planning"].includes(mode)) {
-        errors.push("context.mode must be right_now or planning.");
+      if (mode !== undefined && !MODE_REQUEST_ALLOWED.includes(mode)) {
+        errors.push("context.mode must be by_the_riverside, right_now, or planning.");
       }
       if (waterLevel !== undefined && typeof waterLevel !== "string") {
         errors.push("context.waterLevel must be a string.");
@@ -321,3 +333,8 @@ export function validateFeedbackRequest(payload) {
 
   return { ok: errors.length === 0, errors };
 }
+
+// Backward-compatible export names used by existing imports/tests.
+export const rightNowRequestSchema = byTheRiversideRequestSchema;
+export const rightNowResponseSchema = byTheRiversideResponseSchema;
+export const validateRightNowRequest = validateByTheRiversideRequest;

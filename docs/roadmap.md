@@ -1,7 +1,7 @@
 # Roadmap – whichFly
 
 ## MVP
-- Core “Right now” recommendation flow
+- Core “By the riverside” recommendation flow
 - GPS-based river suggestion
 - UK rivers – trout
 - Full UK river dataset with reach-level points for context (GB + NI)

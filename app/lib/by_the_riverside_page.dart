@@ -1,13 +1,27 @@
 import 'package:flutter/material.dart';
 
-import 'models/right_now_models.dart';
+import 'models/by_the_riverside_models.dart';
 import 'services/location_service.dart';
 import 'services/whichfly_api.dart';
 
-enum AppMode { rightNow, planning }
+enum AppMode { byTheRiverside, planning }
 
-class RightNowPage extends StatefulWidget {
-  const RightNowPage({
+class _UiPalette {
+  static const Color text = Color(0xFF2E2A24);
+  static const Color muted = Color(0xFF6B6256);
+  static const Color subhead = Color(0xFF4E473E);
+  static const Color primary = Color(0xFF2F4B3D);
+  static const Color pageTop = Color(0xFFF5F2EA);
+  static const Color pageMid = Color(0xFFE5E1D6);
+  static const Color pageBottom = Color(0xFFD6D2C6);
+  static const Color toggleBg = Color(0xFFEFECE4);
+  static const Color toggleBorder = Color(0xFFD9D0C2);
+  static const Color confidenceBg = Color(0xFFF2EDE3);
+  static const Color confidenceBorder = Color(0xFFC8C0B4);
+}
+
+class ByTheRiversidePage extends StatefulWidget {
+  const ByTheRiversidePage({
     super.key,
     required this.api,
     required this.locationService,
@@ -17,10 +31,10 @@ class RightNowPage extends StatefulWidget {
   final LocationService locationService;
 
   @override
-  State<RightNowPage> createState() => _RightNowPageState();
+  State<ByTheRiversidePage> createState() => _ByTheRiversidePageState();
 }
 
-class _RightNowPageState extends State<RightNowPage> {
+class _ByTheRiversidePageState extends State<ByTheRiversidePage> {
   final TextEditingController _manualRiverController = TextEditingController();
   final TextEditingController _planningRiverController =
       TextEditingController();
@@ -33,7 +47,7 @@ class _RightNowPageState extends State<RightNowPage> {
   String? _suggestedRiver;
   String? _confirmedRiver;
 
-  AppMode _mode = AppMode.rightNow;
+  AppMode _mode = AppMode.byTheRiverside;
   String _riverStatus = 'Requesting location...';
   String _waterLevel = 'normal';
   String _fishRising = 'unknown';
@@ -41,9 +55,11 @@ class _RightNowPageState extends State<RightNowPage> {
   bool _showManualSelector = false;
   bool _showContext = false;
   bool _isLoadingRecommendation = false;
+  bool _isLoadingRiverOptions = false;
 
   String? _requestError;
-  RightNowRecommendation? _recommendation;
+  String? _riverOptionsError;
+  ByTheRiversideRecommendation? _recommendation;
 
   @override
   void initState() {
@@ -69,11 +85,17 @@ class _RightNowPageState extends State<RightNowPage> {
   }
 
   Future<void> _loadRiverOptions() async {
+    setState(() {
+      _isLoadingRiverOptions = true;
+      _riverOptionsError = null;
+    });
+
     try {
       final options = await widget.api.fetchRiverOptions();
       if (!mounted) return;
       setState(() {
         _riverOptions = options;
+        _isLoadingRiverOptions = false;
         _planningSelection =
             _planningSelection ?? (options.isNotEmpty ? options.first : null);
       });
@@ -81,6 +103,9 @@ class _RightNowPageState extends State<RightNowPage> {
       if (!mounted) return;
       setState(() {
         _riverOptions = <RiverOption>[];
+        _isLoadingRiverOptions = false;
+        _riverOptionsError =
+            'Unable to load river catalog. Check API connection and retry.';
       });
     }
   }
@@ -107,18 +132,23 @@ class _RightNowPageState extends State<RightNowPage> {
     try {
       final suggestion = await widget.api.suggestRiver(gps: location.gps!);
       if (!mounted) return;
-      if (suggestion.name.isEmpty) {
+      final suggestionName = suggestion.name.trim();
+      if (suggestionName.isEmpty || suggestionName.toLowerCase() == 'unknown') {
         setState(() {
-          _riverStatus = 'Unable to suggest a river. Select a river manually.';
+          _riverStatus =
+              'No nearby UK river found from location. Select a river manually.';
           _showManualSelector = true;
         });
+        if (_riverOptions.isEmpty && !_isLoadingRiverOptions) {
+          _loadRiverOptions();
+        }
         return;
       }
       setState(() {
-        _suggestedRiver = suggestion.name;
+        _suggestedRiver = suggestionName;
         _confirmedRiver = null;
         _showManualSelector = false;
-        _riverStatus = 'Suggested river: ${suggestion.name}';
+        _riverStatus = 'Suggested river: $suggestionName';
       });
     } catch (_) {
       if (!mounted) return;
@@ -128,6 +158,9 @@ class _RightNowPageState extends State<RightNowPage> {
         _suggestedRiver = null;
         _confirmedRiver = null;
       });
+      if (_riverOptions.isEmpty && !_isLoadingRiverOptions) {
+        _loadRiverOptions();
+      }
     }
   }
 
@@ -145,6 +178,9 @@ class _RightNowPageState extends State<RightNowPage> {
       _confirmedRiver = null;
       _riverStatus = 'Choose a river.';
     });
+    if (_riverOptions.isEmpty && !_isLoadingRiverOptions) {
+      _loadRiverOptions();
+    }
   }
 
   void _setMode(AppMode mode) {
@@ -162,7 +198,7 @@ class _RightNowPageState extends State<RightNowPage> {
     return null;
   }
 
-  (String riverName, String? reachId)? _selectedRightNowRiverContext() {
+  (String riverName, String? reachId)? _selectedByTheRiversideRiverContext() {
     if (_confirmedRiver != null && _confirmedRiver!.isNotEmpty) {
       return (_confirmedRiver!, null);
     }
@@ -192,8 +228,8 @@ class _RightNowPageState extends State<RightNowPage> {
     return null;
   }
 
-  Future<void> _getRightNowRecommendation() async {
-    final context = _selectedRightNowRiverContext();
+  Future<void> _getByTheRiversideRecommendation() async {
+    final context = _selectedByTheRiversideRiverContext();
     if (context == null) {
       setState(() {
         _requestError = 'Select a river to continue.';
@@ -210,7 +246,7 @@ class _RightNowPageState extends State<RightNowPage> {
     });
 
     try {
-      final recommendation = await widget.api.fetchRightNowRecommendation(
+      final recommendation = await widget.api.fetchByTheRiversideRecommendation(
         riverName: context.$1,
         riverReachId: context.$2,
         waterLevel: _waterLevel,
@@ -301,10 +337,10 @@ class _RightNowPageState extends State<RightNowPage> {
       final planningContext = _selectedPlanningRiverContext();
       return _planningSelection?.label ?? planningContext?.$1 ?? 'Unavailable';
     }
-    final rightNowContext = _selectedRightNowRiverContext();
+    final byTheRiversideContext = _selectedByTheRiversideRiverContext();
     return _confirmedRiver ??
         _manualSelection?.label ??
-        rightNowContext?.$1 ??
+        byTheRiversideContext?.$1 ??
         'Unavailable';
   }
 
@@ -314,131 +350,192 @@ class _RightNowPageState extends State<RightNowPage> {
     final isPlanning = _mode == AppMode.planning;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('whichFly')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildModeToggle(),
-            const SizedBox(height: 16),
-            Text(
-              isPlanning ? 'Planning a trip' : 'By the riverside now',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              isPlanning
-                  ? 'Planning flow for UK river trout.'
-                  : 'Right now flow for UK river trout.',
-            ),
-            const SizedBox(height: 20),
-            if (isPlanning) _buildPlanningCard() else _buildRightNowCard(),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                key: ValueKey<String>(
-                  isPlanning
-                      ? 'getPlanningRecommendationButton'
-                      : 'getFlyRecommendationButton',
-                ),
-                onPressed: _isLoadingRecommendation
-                    ? null
-                    : (isPlanning
-                          ? _getPlanningRecommendation
-                          : _getRightNowRecommendation),
-                child: Text(
-                  _isLoadingRecommendation
-                      ? 'Loading...'
-                      : (isPlanning
-                            ? 'Get planning fly recommendation'
-                            : 'Get fly recommendation'),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            if (recommendation?.confidence == 'low')
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.orange.shade200),
-                ),
-                child: const Text(
-                  'Low confidence. If you can, add one quick observation to improve the call.',
-                ),
-              ),
-            _buildRecommendationCard(
-              recommendation,
-              emptyMessage: isPlanning
-                  ? 'Select a date and river to request a recommendation.'
-                  : 'Select water level and request a recommendation.',
-            ),
-            if (recommendation != null) ...[
-              const SizedBox(height: 12),
-              TextButton(
-                key: const ValueKey<String>('toggleContextButton'),
-                onPressed: () {
-                  setState(() {
-                    _showContext = !_showContext;
-                  });
-                },
-                child: Text(
-                  _showContext ? 'Hide context' : 'Show context used',
-                ),
-              ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(0, -1),
+            radius: 1.25,
+            colors: [
+              _UiPalette.pageTop,
+              _UiPalette.pageMid,
+              _UiPalette.pageBottom,
             ],
-            if (_showContext && recommendation != null)
-              _buildContextCard(recommendation),
-          ],
+            stops: [0.0, 0.55, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 36),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildPageHeader(isPlanning: isPlanning),
+                    const SizedBox(height: 20),
+                    if (isPlanning)
+                      _buildPlanningCard()
+                    else
+                      _buildByTheRiversideCard(),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        key: ValueKey<String>(
+                          isPlanning
+                              ? 'getPlanningRecommendationButton'
+                              : 'getFlyRecommendationButton',
+                        ),
+                        onPressed: _isLoadingRecommendation
+                            ? null
+                            : (isPlanning
+                                  ? _getPlanningRecommendation
+                                  : _getByTheRiversideRecommendation),
+                        child: Text(
+                          _isLoadingRecommendation
+                              ? 'Loading...'
+                              : (isPlanning
+                                    ? 'Get planning fly recommendation'
+                                    : 'Get fly recommendation'),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (recommendation?.confidence == 'low')
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: _UiPalette.confidenceBg,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: _UiPalette.confidenceBorder,
+                            style: BorderStyle.solid,
+                          ),
+                        ),
+                        child: const Text(
+                          'Low confidence. If you can, add one quick observation to improve the call.',
+                        ),
+                      ),
+                    _buildRecommendationCard(
+                      recommendation,
+                      emptyMessage: isPlanning
+                          ? 'Select a date and river to request a recommendation.'
+                          : 'Select water level and request a recommendation.',
+                    ),
+                    if (recommendation != null) ...[
+                      const SizedBox(height: 12),
+                      TextButton(
+                        key: const ValueKey<String>('toggleContextButton'),
+                        onPressed: () {
+                          setState(() {
+                            _showContext = !_showContext;
+                          });
+                        },
+                        child: Text(
+                          _showContext ? 'Hide context' : 'Show context used',
+                        ),
+                      ),
+                    ],
+                    if (_showContext && recommendation != null)
+                      _buildContextCard(recommendation),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildModeToggle() {
-    return Row(
+  Widget _buildPageHeader({required bool isPlanning}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: FilledButton(
-            key: const ValueKey<String>('modeRiversideButton'),
-            onPressed: () => _setMode(AppMode.rightNow),
-            style: FilledButton.styleFrom(
-              backgroundColor: _mode == AppMode.rightNow
-                  ? null
-                  : Colors.grey.shade300,
-              foregroundColor: _mode == AppMode.rightNow
-                  ? null
-                  : Colors.black87,
-            ),
-            child: const Text('By the riverside now'),
+        const Text(
+          'WHICHFLY',
+          style: TextStyle(
+            color: _UiPalette.muted,
+            letterSpacing: 2.8,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: FilledButton(
-            key: const ValueKey<String>('modePlanningButton'),
-            onPressed: () => _setMode(AppMode.planning),
-            style: FilledButton.styleFrom(
-              backgroundColor: _mode == AppMode.planning
-                  ? null
-                  : Colors.grey.shade300,
-              foregroundColor: _mode == AppMode.planning
-                  ? null
-                  : Colors.black87,
-            ),
-            child: const Text('Planning a trip'),
+        const SizedBox(height: 6),
+        Text(
+          isPlanning ? 'Planning a trip' : 'By the riverside',
+          style: const TextStyle(
+            fontSize: 40,
+            height: 1.05,
+            color: _UiPalette.text,
+            fontWeight: FontWeight.w700,
           ),
         ),
+        const SizedBox(height: 8),
+        const Text(
+          'Fly choice for UK river trout.',
+          style: TextStyle(color: _UiPalette.subhead, fontSize: 16),
+        ),
+        const SizedBox(height: 12),
+        _buildModeToggle(),
       ],
     );
   }
 
-  Widget _buildRightNowCard() {
+  Widget _buildModeToggle() {
+    return Container(
+      decoration: BoxDecoration(
+        color: _UiPalette.toggleBg,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: _UiPalette.toggleBorder),
+      ),
+      padding: const EdgeInsets.all(6),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          _buildModeButton(
+            key: const ValueKey<String>('modeRiversideButton'),
+            selected: _mode == AppMode.byTheRiverside,
+            label: 'By the riverside',
+            onPressed: () => _setMode(AppMode.byTheRiverside),
+          ),
+          _buildModeButton(
+            key: const ValueKey<String>('modePlanningButton'),
+            selected: _mode == AppMode.planning,
+            label: 'Planning a trip',
+            onPressed: () => _setMode(AppMode.planning),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModeButton({
+    required Key key,
+    required bool selected,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return TextButton(
+      key: key,
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        foregroundColor: selected
+            ? const Color(0xFFF5F1E8)
+            : _UiPalette.subhead,
+        backgroundColor: selected ? _UiPalette.primary : Colors.transparent,
+        textStyle: const TextStyle(fontSize: 15),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      ),
+      child: Text(label),
+    );
+  }
+
+  Widget _buildByTheRiversideCard() {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -483,14 +580,17 @@ class _RightNowPageState extends State<RightNowPage> {
               ),
             if (_showManualSelector) ...[
               const SizedBox(height: 8),
+              if (_isLoadingRiverOptions)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: LinearProgressIndicator(minHeight: 3),
+                ),
               if (_riverOptions.isNotEmpty)
                 DropdownButtonFormField<RiverOption>(
                   key: const ValueKey<String>('manualRiverDropdown'),
                   initialValue: _manualSelection,
-                  decoration: const InputDecoration(
-                    labelText: 'Select river',
-                    border: OutlineInputBorder(),
-                  ),
+                  isExpanded: true,
+                  decoration: const InputDecoration(labelText: 'Select river'),
                   items: _riverOptions
                       .map(
                         (option) => DropdownMenuItem<RiverOption>(
@@ -509,11 +609,21 @@ class _RightNowPageState extends State<RightNowPage> {
                 TextField(
                   key: const ValueKey<String>('manualRiverTextField'),
                   controller: _manualRiverController,
-                  decoration: const InputDecoration(
-                    labelText: 'River name',
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: const InputDecoration(labelText: 'River name'),
                 ),
+              if (_riverOptions.isEmpty && _riverOptionsError != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  _riverOptionsError!,
+                  style: const TextStyle(color: Colors.red),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton(
+                  key: const ValueKey<String>('retryRiverOptionsButton'),
+                  onPressed: _isLoadingRiverOptions ? null : _loadRiverOptions,
+                  child: const Text('Retry river catalog'),
+                ),
+              ],
             ],
             const SizedBox(height: 14),
             const Text('Water level'),
@@ -521,7 +631,8 @@ class _RightNowPageState extends State<RightNowPage> {
             DropdownButtonFormField<String>(
               key: const ValueKey<String>('waterLevelDropdown'),
               initialValue: _waterLevel,
-              decoration: const InputDecoration(border: OutlineInputBorder()),
+              isExpanded: true,
+              decoration: const InputDecoration(),
               items: const [
                 DropdownMenuItem(value: 'low', child: Text('Low')),
                 DropdownMenuItem(value: 'normal', child: Text('Normal')),
@@ -540,7 +651,8 @@ class _RightNowPageState extends State<RightNowPage> {
             DropdownButtonFormField<String>(
               key: const ValueKey<String>('fishRisingDropdown'),
               initialValue: _fishRising,
-              decoration: const InputDecoration(border: OutlineInputBorder()),
+              isExpanded: true,
+              decoration: const InputDecoration(),
               items: const [
                 DropdownMenuItem(value: 'yes', child: Text('Yes')),
                 DropdownMenuItem(value: 'no', child: Text('No')),
@@ -567,7 +679,7 @@ class _RightNowPageState extends State<RightNowPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Planning',
+              'Planning a trip',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
@@ -577,10 +689,8 @@ class _RightNowPageState extends State<RightNowPage> {
               DropdownButtonFormField<RiverOption>(
                 key: const ValueKey<String>('planningRiverDropdown'),
                 initialValue: _planningSelection,
-                decoration: const InputDecoration(
-                  labelText: 'Select river',
-                  border: OutlineInputBorder(),
-                ),
+                isExpanded: true,
+                decoration: const InputDecoration(labelText: 'Select river'),
                 items: _riverOptions
                     .map(
                       (option) => DropdownMenuItem<RiverOption>(
@@ -599,21 +709,28 @@ class _RightNowPageState extends State<RightNowPage> {
               TextField(
                 key: const ValueKey<String>('planningRiverTextField'),
                 controller: _planningRiverController,
-                decoration: const InputDecoration(
-                  labelText: 'River name',
-                  border: OutlineInputBorder(),
-                ),
+                decoration: const InputDecoration(labelText: 'River name'),
               ),
+            if (_riverOptions.isEmpty && _riverOptionsError != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                _riverOptionsError!,
+                style: const TextStyle(color: Colors.red),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton(
+                key: const ValueKey<String>('retryPlanningRiverOptionsButton'),
+                onPressed: _isLoadingRiverOptions ? null : _loadRiverOptions,
+                child: const Text('Retry river catalog'),
+              ),
+            ],
             const SizedBox(height: 14),
             const Text('Date'),
             const SizedBox(height: 6),
             TextField(
               key: const ValueKey<String>('planningDateField'),
               controller: _planningDateController,
-              decoration: const InputDecoration(
-                hintText: 'YYYY-MM-DD',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(hintText: 'YYYY-MM-DD'),
             ),
           ],
         ),
@@ -622,7 +739,7 @@ class _RightNowPageState extends State<RightNowPage> {
   }
 
   Widget _buildRecommendationCard(
-    RightNowRecommendation? recommendation, {
+    ByTheRiversideRecommendation? recommendation, {
     required String emptyMessage,
   }) {
     if (_isLoadingRecommendation) {
@@ -696,7 +813,7 @@ class _RightNowPageState extends State<RightNowPage> {
     );
   }
 
-  Widget _buildContextCard(RightNowRecommendation recommendation) {
+  Widget _buildContextCard(ByTheRiversideRecommendation recommendation) {
     final context = recommendation.context;
     final weather = context.weather;
     final daylight = context.daylight;

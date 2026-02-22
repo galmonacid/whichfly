@@ -1,6 +1,6 @@
 import 'package:geolocator/geolocator.dart';
 
-import '../models/right_now_models.dart';
+import '../models/by_the_riverside_models.dart';
 
 class LocationOutcome {
   const LocationOutcome({required this.gps, required this.message});

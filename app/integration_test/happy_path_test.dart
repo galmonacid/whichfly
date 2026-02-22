@@ -3,7 +3,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:whichfly_app/main.dart';
-import 'package:whichfly_app/models/right_now_models.dart';
+import 'package:whichfly_app/models/by_the_riverside_models.dart';
 import 'package:whichfly_app/services/location_service.dart';
 import 'package:whichfly_app/services/whichfly_api.dart';
 
@@ -25,13 +25,13 @@ class FakeWhichFlyApi implements WhichFlyApi {
 
   final List<RiverOption> options;
   final RiverSuggestion suggestion;
-  final RightNowRecommendation recommendation;
+  final ByTheRiversideRecommendation recommendation;
 
   @override
   Future<List<RiverOption>> fetchRiverOptions() async => options;
 
   @override
-  Future<RightNowRecommendation> fetchRightNowRecommendation({
+  Future<ByTheRiversideRecommendation> fetchByTheRiversideRecommendation({
     required String riverName,
     String? riverReachId,
     required String waterLevel,
@@ -42,7 +42,7 @@ class FakeWhichFlyApi implements WhichFlyApi {
   }
 
   @override
-  Future<RightNowRecommendation> fetchPlanningRecommendation({
+  Future<ByTheRiversideRecommendation> fetchPlanningRecommendation({
     required String riverName,
     String? riverReachId,
     required String plannedDate,
@@ -58,7 +58,7 @@ class FakeWhichFlyApi implements WhichFlyApi {
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('happy path shows recommendation for right now', (
+  testWidgets('happy path shows recommendation in by-the-riverside mode', (
     WidgetTester tester,
   ) async {
     final api = FakeWhichFlyApi(
@@ -103,7 +103,8 @@ void main() {
   });
 }
 
-const RightNowRecommendation _sampleRecommendation = RightNowRecommendation(
+const ByTheRiversideRecommendation
+_sampleRecommendation = ByTheRiversideRecommendation(
   riverName: 'River Test',
   primaryPattern: 'Pheasant Tail Nymph',
   primaryType: 'nymph',

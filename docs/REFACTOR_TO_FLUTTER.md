@@ -24,13 +24,13 @@ This is a **UI refactor**, not a product expansion. The MVP scope stays the same
 ## Are tests sufficient for a refactor?
 **No.** We have strong backend coverage, but **minimal UI coverage**.
 Risks:
-- UI regressions in Right now/Planning flows
+- UI regressions in By the riverside/Planning flows
 - Permission/geo flow differences on iOS
 - Subtle UX changes (toggle states, validation messages)
 
 **Minimum additional test coverage recommended before refactor:**
 - API contract fixture test (snapshot response from backend)
-- UI flow tests (Right now + Planning) using:
+- UI flow tests (By the riverside + Planning) using:
   - Flutter widget tests
   - 1 integration test (happy path) for iOS + web
 
@@ -45,7 +45,7 @@ Keep the backend **unchanged**. Replace the frontend with Flutter.
 - Add golden JSON fixtures for API responses.
 - Outputs:
   - `docs/FLUTTER_PHASE0_PARITY_CHECKLIST.md`
-  - `contracts/fixtures/right_now_response.golden.json`
+  - `contracts/fixtures/by_the_riverside_response.golden.json`
 
 ### Phase 1 — Flutter scaffolding
 - Create `app/` Flutter project in repo.
@@ -53,7 +53,7 @@ Keep the backend **unchanged**. Replace the frontend with Flutter.
 - Set up Firebase Hosting for Flutter web build (`flutter build web` output).
 - Add CI build step for Flutter web and widget tests.
 
-### Phase 2 — Right now flow
+### Phase 2 — By the riverside flow
 - Rebuild UI: water level, river selection, fish rising, submit.
 - Geolocation + permission prompts (iOS).
 - Context panel and confidence UX parity.
@@ -80,7 +80,7 @@ Keep the backend **unchanged**. Replace the frontend with Flutter.
 ---
 
 ## Acceptance criteria
-- Right now and Planning flows match current behaviour.
+- By the riverside and Planning flows match current behaviour.
 - API request payloads are identical.
 - Output rendering matches existing UI requirements.
 - iOS permissions and error states are handled.
@@ -95,7 +95,7 @@ You are an agentic development assistant working on the whichFly project.
 Before doing anything:
 - Read and follow AGENTIC_DEVELOPMENT.md strictly.
 - Treat PRODUCT.md, MVP.md, AI_AGENT.md, DATA.md, and ARCHITECTURE.md as sources of truth.
-- whichFly is a streamside, “right now” decision-support tool for UK river trout fishing.
+- whichFly is a streamside, “by the riverside” decision-support tool for UK river trout fishing.
 
 Non-negotiable constraints:
 - Do NOT add features outside the defined MVP.

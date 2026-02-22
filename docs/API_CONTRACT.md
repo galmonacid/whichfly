@@ -12,13 +12,14 @@ This document describes request/response structures for whichFly MVP.
 - `waterLevel`: `low | normal | high`
 - `riverName` (optional): string (user-selected river)
 - `riverReachId` (optional): string (specific section selection)
-- `mode` (optional): `right_now | planning` (defaults to `right_now`)
+- `mode` (optional): `by_the_riverside | planning` (defaults to `by_the_riverside`)
+- Backward compatibility: `right_now` is accepted as an alias for `by_the_riverside`
 - `plannedDate` (required for planning): `YYYY-MM-DD`
 - `observations` (optional):
   - `fishRising`: boolean | null
 
 Derived inputs:
-- `season`: derived from `plannedDate` (planning) or system date (right_now)
+- `season`: derived from `plannedDate` (planning) or system date (by_the_riverside)
 
 ## River list (`GET /api/rivers`)
 Response:
@@ -45,7 +46,7 @@ Request:
 - `sessionId`: string (anonymous, stored in local storage)
 - `outcome`: `up | down`
 - `context` (optional):
-  - `mode`: `right_now | planning`
+  - `mode`: `by_the_riverside | planning` (`right_now` accepted as alias)
   - `waterLevel`: string
   - `plannedDate`: `YYYY-MM-DD`
   - `confidence`: `high | medium | low`
@@ -55,7 +56,7 @@ Response:
 
 ## Response
 The response MUST validate against:
-- `contracts/right_now.schema.json`
+- `contracts/by_the_riverside.schema.json`
 
 Key fields:
 - `river`: suggestion and confidence (see schema)

@@ -73,7 +73,7 @@ When grounding snippets are provided to the LLM:
 - If grounding conflicts with current conditions, **prefer current conditions**.
 
 All LLM outputs still must validate against:
-- `contracts/right_now.schema.json`
+- `contracts/by_the_riverside.schema.json`
 - `docs/FLY_ALLOWLIST.md`
 - `docs/LLM_GUARDRAILS_TESTS.md`
 

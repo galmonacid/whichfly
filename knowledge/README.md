@@ -6,7 +6,7 @@ This folder contains curated knowledge used to ground the LLM safely.
 - We store **summaries**, not copied text.
 - Snippets are **background only**, never factual claims.
 - The LLM must still comply with:
-  - contracts/right_now.schema.json
+  - contracts/by_the_riverside.schema.json
   - docs/FLY_ALLOWLIST.md
   - docs/LLM_GUARDRAILS_TESTS.md
 - Allowlist enforcement is controlled by `ALLOWLIST_ENFORCEMENT` (default off).
