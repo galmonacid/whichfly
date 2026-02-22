@@ -31,8 +31,6 @@ const frontendDir = path.join(projectRoot, "frontend");
 const PORT = Number(process.env.PORT || 3000);
 const FLY_ALLOWLIST = loadFlyAllowlist();
 const GROUNDING_SNIPPETS = loadGroundingSnippets();
-const LLM_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 const IS_PROD = process.env.NODE_ENV === "production";
 const LLM_DEBUG = !IS_PROD && process.env.LLM_DEBUG === "true";
 const ALLOWLIST_ENFORCEMENT = process.env.ALLOWLIST_ENFORCEMENT === "true";
@@ -52,6 +50,14 @@ const WEATHER_API_BASE_URL = process.env.WEATHER_API_BASE_URL || "https://api.op
 const DAYLIGHT_API_BASE_URL = process.env.DAYLIGHT_API_BASE_URL || "https://api.sunrise-sunset.org";
 void WEATHER_API_BASE_URL;
 void DAYLIGHT_API_BASE_URL;
+
+function getOpenAiApiKey() {
+  return process.env.OPENAI_API_KEY || "";
+}
+
+function getOpenAiModel() {
+  return process.env.OPENAI_MODEL || "gpt-4o-mini";
+}
 
 const MOCK_RECOMMENDATION = {
   river: {
@@ -338,7 +344,9 @@ export function createServer() {
               }
         };
 
-        if (OPENAI_API_KEY) {
+        const openAiApiKey = getOpenAiApiKey();
+        if (openAiApiKey) {
+          const llmModel = getOpenAiModel();
           if (LLM_DEBUG) {
             console.log("llm_attempt");
           }
@@ -368,8 +376,8 @@ export function createServer() {
                 systemPrompt,
                 userPrompt: runtimePrompt,
                 schema: RESPONSE_SCHEMA,
-                model: LLM_MODEL,
-                apiKey: OPENAI_API_KEY,
+                model: llmModel,
+                apiKey: openAiApiKey,
                 timeoutMs: 8000,
                 fetchImpl: fetch,
                 logger: LLM_DEBUG ? (event, meta = {}) => console.log(event, meta) : undefined
