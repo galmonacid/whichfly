@@ -1,0 +1,51 @@
+{
+  "river": {
+    "name": "River Test",
+    "source": "user_selected",
+    "confidence": "high",
+    "distance_m": null
+  },
+  "primary": {
+    "pattern": "Pheasant Tail Nymph",
+    "type": "nymph",
+    "size": 14
+  },
+  "alternatives": [
+    {
+      "pattern": "Hare's Ear Nymph",
+      "type": "nymph",
+      "size": 14,
+      "when": "If fish are not taking the primary nymph"
+    },
+    {
+      "pattern": "Parachute Adams",
+      "type": "dry",
+      "size": 16,
+      "when": "If fish start rising near the surface"
+    }
+  ],
+  "explanation": "A proven nymph pattern is a conservative default for mixed river trout conditions when no strong hatch signal is confirmed.",
+  "confidence": "medium",
+  "confidence_reasons": [
+    "Water level alone gives partial context",
+    "No confirmed hatch information",
+    "Primary recommendation is conservative"
+  ],
+  "context_used": {
+    "weather": {
+      "temperature_c": 8.2,
+      "precipitation_mm": 0,
+      "cloud_cover_pct": 40,
+      "wind_speed_kph": 12
+    },
+    "daylight": {
+      "is_daylight": true,
+      "minutes_to_sunset": 95
+    }
+  },
+  "meta": {
+    "version": "1.0",
+    "mode": "right_now",
+    "generated_at": "2026-02-22T10:30:00Z"
+  }
+}

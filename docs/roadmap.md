@@ -5,7 +5,7 @@
 - GPS-based river suggestion
 - UK rivers – trout
 - Full UK river dataset with reach-level points for context (GB + NI)
-- Web-only
+- Flutter client for iOS + web (shared UI codebase)
 
 ---
 
@@ -22,7 +22,7 @@
 - Club and fishery integrations
 - Region-specific tuning
 - Offline-first support
-- Native mobile app
+- Android target from the same Flutter codebase
 
 ---
 

@@ -2,7 +2,7 @@
 
 ## MVP scope (included)
 
-- Web-based responsive app (mobile-first)
+- Flutter app with shared codebase for iOS + web
 - UK rivers only
 - Trout species only
 - Primary mode: Right now (streamside)

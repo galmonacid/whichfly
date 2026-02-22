@@ -2,7 +2,7 @@
 
 ## App type
 
-- Web application
+- Cross-platform Flutter client (iOS + web)
 - Mobile-first, responsive
 - Optimised for outdoor use
 
@@ -11,14 +11,17 @@
 ## Core components
 
 ### Frontend
+- Flutter UI (single codebase for iOS + web)
 - Minimal input UI
 - Clear recommendation output
 - Designed for quick interaction
+- Web build hosted on Firebase Hosting
 
 ### Backend / API
 - Receives user inputs
 - Enriches context (weather, daylight)
 - Orchestrates AI agent execution
+- Runs as a Cloud Run service (public API)
 
 ### River dataset & preprocessing
 - Offline build step ingests GB + NI river data
@@ -46,5 +49,6 @@ Device location
 ## Assumptions
 
 - Stateless backend (MVP)
-- Cloud-hosted
+- Flutter client targets iOS + web
+- Firebase Hosting + Cloud Run for web/API
 - External APIs called on demand

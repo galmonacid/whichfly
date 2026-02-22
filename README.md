@@ -40,10 +40,17 @@ If it cannot be used quickly at the river, it does not belong in the MVP.
 
 ### Requirements
 - Node.js 18+
+- Flutter SDK (required for Phase 10 migration work)
+- Xcode (required for local iOS builds)
 
 ### Run the app
 - `npm run dev`
 - Open `http://localhost:3000`
+
+### Flutter migration status
+- Current frontend runtime is still `frontend/` (HTML/CSS/JS).
+- Target architecture is Flutter for iOS + web (`docs/REFACTOR_TO_FLUTTER.md`).
+- Flutter app scaffolding and migration tasks are tracked in Phase 10 (`docs/execution_plan.md`).
 
 ### Run tests
 - `npm test`
@@ -64,6 +71,30 @@ If it cannot be used quickly at the river, it does not belong in the MVP.
 
 ### Local env file (optional)
 Create a `.env.local` in the project root to set environment variables for local dev.
+
+---
+
+## Deployment (Firebase Hosting + Cloud Run)
+
+This repo includes GitHub Actions workflows:
+- `CI` runs lint + tests on push/PR.
+- `Deploy` deploys Cloud Run (API) and Firebase Hosting (frontend) on push to `main`.
+- Deploy now builds Flutter web (`app/build/web`) before publishing Hosting.
+
+Prerequisites:
+- Firebase project with billing enabled
+- Cloud Run and Cloud Build APIs enabled
+
+Required GitHub secrets:
+- `GCP_PROJECT_ID`
+- `GCP_SA_KEY` (service account JSON with permissions to deploy Cloud Run and Firebase Hosting)
+
+Cloud Run settings:
+- Service name and region are defined in `firebase.json` and `.github/workflows/deploy.yml`.
+- TODO: Confirm `whichfly-api` and `europe-west1` before the first deploy.
+
+Runtime env vars:
+- Configure `OPENAI_API_KEY`, `OPENAI_MODEL`, and related settings in Cloud Run service env vars.
 
 ---
 

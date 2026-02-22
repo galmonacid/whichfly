@@ -100,7 +100,9 @@ A change without evidence is considered incomplete.
 ### Pattern safety
 - All fly patterns MUST come from `docs/FLY_ALLOWLIST.md`
 - Allowlist enforcement is controlled by `ALLOWLIST_ENFORCEMENT` (default off)
-- Any violation triggers retry → fallback when enforcement is enabled
+- When enforcement is enabled, any violation triggers retry → fallback
+- When enforcement is disabled, the allowlist still applies to fallback/bias logic; the model is instructed to comply but is not guaranteed
+- The allowlist is enforced in the backend, not passed as model input data
 
 ### Anti-hallucination rules
 LLM outputs MUST NOT:

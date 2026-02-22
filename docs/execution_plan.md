@@ -412,6 +412,7 @@ Implement feedback aggregation and safe usage:
   - no hatch/local factual claims
   - do not change schema
 Provide Change Summary with tests and rollback notes.
+```
 
 ---
 
@@ -427,11 +428,42 @@ Provide Change Summary with tests and rollback notes.
 - Cache last successful recommendation locally
 - Graceful “no signal” mode
 
-### [] 9.3 Deployment
-- Minimal CI (lint + tests)
-- One-click deploy target
+### [DONE] 9.3 Deployment (Firebase Hosting + Cloud Run)
+- Firebase Hosting config with Cloud Run rewrites (`firebase.json`)
+- Cloud Run service deployment via GitHub Actions
+- CI workflow with lint + tests
+- Document deploy steps, required secrets, and env vars
+- TODO: Confirm Cloud Run region/service name before first deploy
 
 (These are intentionally later; only start once core UX is proven.)
+
+---
+
+## [] Phase 10 — Flutter Migration (iOS + Web)
+
+### [DONE] 10.1 Scaffold Flutter app and baseline config
+**Goal:** Create the Flutter client while keeping backend unchanged.
+- Add `app/` Flutter project
+- Configure API base URL per environment
+- Keep existing Node backend contract intact
+
+### [DONE] 10.2 Rebuild Right now flow in Flutter
+**Goal:** Match current behaviour in iOS and web.
+- Inputs: river, water level, fish rising
+- Geolocation permission flow
+- Recommendation and context rendering parity
+
+### [DONE] 10.3 Rebuild Planning flow in Flutter
+**Goal:** Preserve secondary planning mode with same contract.
+- Inputs: date + river
+- `mode=planning` request path
+- Confidence/disclaimer parity
+
+### [DONE] 10.4 Add Flutter CI + deploy path
+**Goal:** Build/test Flutter app and deploy web build.
+- Add Flutter CI checks (`flutter analyze`, `flutter test`)
+- Add web build step (`flutter build web`)
+- Update Hosting deploy to publish Flutter web output
 
 ---
 

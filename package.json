@@ -3,7 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "lint": "find backend frontend -name \"*.js\" -type f -not -path \"*/node_modules/*\" -print0 | xargs -0 -n1 node --check",
     "dev": "node backend/server.js",
+    "start": "node backend/server.js",
     "aggregate-feedback": "node scripts/aggregate_feedback.js",
     "test": "node --test"
   }
