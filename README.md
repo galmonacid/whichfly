@@ -50,7 +50,7 @@ If it cannot be used quickly at the river, it does not belong in the MVP.
 ### Flutter migration status
 - Current frontend runtime is still `frontend/` (HTML/CSS/JS).
 - Target architecture is Flutter for iOS + web (`docs/REFACTOR_TO_FLUTTER.md`).
-- Flutter app scaffolding and migration tasks are tracked in Phase 10 (`docs/execution_plan.md`).
+- Flutter app scaffolding and migration tasks are tracked in Phase 10 (`docs/plan.md`).
 
 ### Run tests
 - `npm test`
@@ -80,6 +80,7 @@ This repo includes GitHub Actions workflows:
 - `CI` runs lint + tests on push/PR.
 - `Deploy` deploys Cloud Run (API) and Firebase Hosting (frontend) on push to `main`.
 - Deploy now builds Flutter web (`app/build/web`) before publishing Hosting.
+- `iOS TestFlight` builds a signed iOS IPA on macOS and can upload it to TestFlight (manual trigger).
 
 Prerequisites:
 - Firebase project with billing enabled
@@ -88,6 +89,14 @@ Prerequisites:
 Required GitHub secrets:
 - `GCP_PROJECT_ID`
 - `GCP_SA_KEY` (service account JSON with permissions to deploy Cloud Run and Firebase Hosting)
+
+Additional secrets for iOS TestFlight workflow:
+- `IOS_CERTIFICATE_P12_BASE64`
+- `IOS_CERTIFICATE_PASSWORD`
+- `IOS_PROVISIONING_PROFILE_BASE64`
+- `APPSTORE_CONNECT_ISSUER_ID`
+- `APPSTORE_CONNECT_KEY_ID`
+- `APPSTORE_CONNECT_PRIVATE_KEY`
 
 Cloud Run settings:
 - Service name and region are defined in `firebase.json` and `.github/workflows/deploy.yml`.

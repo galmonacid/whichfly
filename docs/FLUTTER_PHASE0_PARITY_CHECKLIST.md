@@ -32,5 +32,7 @@
 - `contracts/fixtures/right_now_response.golden.json`
 
 ## Notes
-- TODO: Add fixture assertions in Flutter integration tests once HTTP client wiring starts.
-- TODO: Add iOS permission flow checklist (location prompt, denied state).
+- Tracking is centralized in `docs/plan.md` (Phase 11).
+- Fixture assertions are implemented in Flutter tests (Phase `11.3`).
+- iOS permission flow checklist and denied/deniedForever coverage are implemented (Phase `11.4`).
+- Checklist source: `docs/IOS_LOCATION_PERMISSION_CHECKLIST.md`.

@@ -112,6 +112,45 @@ void main() {
     );
   });
 
+  testWidgets('shows manual selector when location is denied forever', (
+    WidgetTester tester,
+  ) async {
+    final api = FakeWhichFlyApi(
+      options: const [
+        RiverOption(
+          label: 'River Test - Upper section',
+          riverName: 'River Test',
+          reachId: 'river_test_upper',
+        ),
+      ],
+      suggestion: const RiverSuggestion(
+        name: 'River Test',
+        confidence: 'high',
+        distanceM: 1200,
+        source: 'gps_suggested',
+      ),
+      recommendation: _sampleRecommendation,
+    );
+    final location = FakeLocationService(
+      const LocationOutcome(
+        gps: null,
+        message: 'Location denied permanently. Select a river manually.',
+      ),
+    );
+
+    await tester.pumpWidget(WhichFlyApp(api: api, locationService: location));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Location denied permanently. Select a river manually.'),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey<String>('manualRiverDropdown')),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('loads and renders right now recommendation after confirm', (
     WidgetTester tester,
   ) async {
