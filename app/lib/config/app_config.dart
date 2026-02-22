@@ -1,5 +1,6 @@
 class AppConfig {
-  static const String _defaultApiBaseUrl = 'http://localhost:3000';
+  // Default to same-origin so production hosting rewrites (/api/**) work out of the box.
+  static const String _defaultApiBaseUrl = '/';
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: _defaultApiBaseUrl,
