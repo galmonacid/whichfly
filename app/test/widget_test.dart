@@ -114,7 +114,7 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.byKey(const ValueKey<String>('manualRiverDropdown')),
+      find.byKey(const ValueKey<String>('manualRiverSearchField')),
       findsOneWidget,
     );
   });
@@ -153,7 +153,7 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.byKey(const ValueKey<String>('manualRiverDropdown')),
+      find.byKey(const ValueKey<String>('manualRiverSearchField')),
       findsOneWidget,
     );
   });
@@ -263,13 +263,71 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.byKey(const ValueKey<String>('manualRiverDropdown')),
+      find.byKey(const ValueKey<String>('manualRiverSearchField')),
       findsOneWidget,
     );
     expect(
       find.byKey(const ValueKey<String>('confirmRiverButton')),
       findsNothing,
     );
+  });
+
+  testWidgets('shows matching river suggestions while typing', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(800, 1200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final api = FakeWhichFlyApi(
+      options: const [
+        RiverOption(
+          label: 'River Itchen - Upper section',
+          riverName: 'River Itchen',
+          reachId: 'river_itchen_upper',
+        ),
+        RiverOption(
+          label: 'River Test - Upper section',
+          riverName: 'River Test',
+          reachId: 'river_test_upper',
+        ),
+      ],
+      suggestion: const RiverSuggestion(
+        name: '',
+        confidence: 'low',
+        distanceM: null,
+        source: 'unknown',
+      ),
+      recommendation: _sampleRecommendation,
+    );
+    final location = FakeLocationService(
+      const LocationOutcome(
+        gps: null,
+        message: 'Location denied. Select a river manually.',
+      ),
+    );
+
+    await tester.pumpWidget(WhichFlyApp(api: api, locationService: location));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const ValueKey<String>('manualRiverSearchField')),
+      'itch',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('River Itchen - Upper section'), findsOneWidget);
+    expect(find.text('River Test - Upper section'), findsNothing);
+
+    await tester.tap(find.text('River Itchen - Upper section'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.byKey(const ValueKey<String>('getFlyRecommendationButton')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(api.lastRiverName, 'River Itchen');
+    expect(api.lastRiverReachId, 'river_itchen_upper');
   });
 
   testWidgets('shows river catalog retry when options fail to load', (

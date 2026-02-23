@@ -29,6 +29,7 @@ const projectRoot = path.resolve(__dirname, "..");
 const frontendDir = path.join(projectRoot, "frontend");
 
 const PORT = Number(process.env.PORT || 3000);
+const DEFAULT_OPENAI_TIMEOUT_MS = 15000;
 const FLY_ALLOWLIST = loadFlyAllowlist();
 const GROUNDING_SNIPPETS = loadGroundingSnippets();
 const IS_PROD = process.env.NODE_ENV === "production";
@@ -84,6 +85,14 @@ function getOpenAiApiKey() {
 
 function getOpenAiModel() {
   return process.env.OPENAI_MODEL || "gpt-4o-mini";
+}
+
+function getOpenAiTimeoutMs() {
+  const raw = Number.parseInt(process.env.OPENAI_TIMEOUT_MS || "", 10);
+  if (Number.isFinite(raw) && raw >= 1000) {
+    return raw;
+  }
+  return DEFAULT_OPENAI_TIMEOUT_MS;
 }
 
 const MOCK_RECOMMENDATION = {
@@ -381,6 +390,7 @@ export function createServer() {
         };
 
         const openAiApiKey = getOpenAiApiKey();
+        const openAiTimeoutMs = getOpenAiTimeoutMs();
         if (openAiApiKey) {
           const llmModel = getOpenAiModel();
           if (LLM_DEBUG) {
@@ -414,7 +424,7 @@ export function createServer() {
                 schema: RESPONSE_SCHEMA,
                 model: llmModel,
                 apiKey: openAiApiKey,
-                timeoutMs: 8000,
+                timeoutMs: openAiTimeoutMs,
                 fetchImpl: fetch,
                 logger: LLM_DEBUG ? (event, meta = {}) => console.log(event, meta) : undefined
               });
@@ -644,6 +654,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     console.log(`whichFly dev server running on http://localhost:${PORT}`);
     if (LLM_DEBUG) {
       console.log("LLM_DEBUG enabled");
+      console.log(`OPENAI_TIMEOUT_MS=${getOpenAiTimeoutMs()}ms`);
     }
   });
 }

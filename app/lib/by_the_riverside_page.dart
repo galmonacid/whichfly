@@ -98,6 +98,10 @@ class _ByTheRiversidePageState extends State<ByTheRiversidePage> {
         _isLoadingRiverOptions = false;
         _planningSelection =
             _planningSelection ?? (options.isNotEmpty ? options.first : null);
+        if (_planningSelection != null &&
+            _planningRiverController.text.trim().isEmpty) {
+          _planningRiverController.text = _planningSelection!.label;
+        }
       });
     } catch (_) {
       if (!mounted) return;
@@ -332,6 +336,100 @@ class _ByTheRiversidePageState extends State<ByTheRiversidePage> {
     return 'Not sure';
   }
 
+  bool _queryMatchesOption(String query, RiverOption option) {
+    final normalizedQuery = query.trim().toLowerCase();
+    if (normalizedQuery.isEmpty) return false;
+    return normalizedQuery == option.label.toLowerCase() ||
+        normalizedQuery == option.riverName.toLowerCase();
+  }
+
+  List<RiverOption> _filteredRiverOptions(String query) {
+    final normalizedQuery = query.trim().toLowerCase();
+    if (normalizedQuery.isEmpty) return <RiverOption>[];
+
+    return _riverOptions
+        .where(
+          (option) =>
+              option.label.toLowerCase().contains(normalizedQuery) ||
+              option.riverName.toLowerCase().contains(normalizedQuery),
+        )
+        .take(8)
+        .toList();
+  }
+
+  Widget _buildRiverSearchField({
+    required Key fieldKey,
+    required TextEditingController controller,
+    required RiverOption? selectedOption,
+    required ValueChanged<RiverOption?> onSelectionChanged,
+  }) {
+    final query = controller.text.trim();
+    final suggestions = _filteredRiverOptions(query);
+    final showSuggestions =
+        query.isNotEmpty &&
+        (selectedOption == null || !_queryMatchesOption(query, selectedOption));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          key: fieldKey,
+          controller: controller,
+          decoration: const InputDecoration(labelText: 'River name'),
+          onChanged: (value) {
+            if (selectedOption != null &&
+                !_queryMatchesOption(value, selectedOption)) {
+              onSelectionChanged(null);
+              return;
+            }
+            setState(() {});
+          },
+        ),
+        if (showSuggestions) ...[
+          const SizedBox(height: 8),
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: _UiPalette.toggleBorder),
+              color: Colors.white.withOpacity(0.7),
+            ),
+            child: suggestions.isEmpty
+                ? const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Text(
+                      'No rivers match that search.',
+                      key: ValueKey<String>('riverSearchNoResultsText'),
+                      style: TextStyle(color: _UiPalette.muted),
+                    ),
+                  )
+                : Column(
+                    children: suggestions
+                        .map(
+                          (option) => ListTile(
+                            key: ValueKey<String>(
+                              'riverSuggestion-${option.reachId ?? option.riverName}',
+                            ),
+                            dense: true,
+                            title: Text(option.label),
+                            onTap: () {
+                              controller.text = option.label;
+                              controller.selection = TextSelection.collapsed(
+                                offset: controller.text.length,
+                              );
+                              onSelectionChanged(option);
+                              FocusScope.of(context).unfocus();
+                            },
+                          ),
+                        )
+                        .toList(),
+                  ),
+          ),
+        ],
+      ],
+    );
+  }
+
   String _contextRiverLabel() {
     if (_mode == AppMode.planning) {
       final planningContext = _selectedPlanningRiverContext();
@@ -372,7 +470,7 @@ class _ByTheRiversidePageState extends State<ByTheRiversidePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildPageHeader(isPlanning: isPlanning),
+                    _buildPageHeader(),
                     const SizedBox(height: 20),
                     if (isPlanning)
                       _buildPlanningCard()
@@ -451,35 +549,47 @@ class _ByTheRiversidePageState extends State<ByTheRiversidePage> {
     );
   }
 
-  Widget _buildPageHeader({required bool isPlanning}) {
+  Widget _buildPageHeader() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'WHICHFLY',
-          style: TextStyle(
-            color: _UiPalette.muted,
-            letterSpacing: 2.8,
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-          ),
+        Row(
+          children: [
+            Container(
+              width: 10,
+              height: 10,
+              decoration: const BoxDecoration(
+                color: _UiPalette.primary,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'WHICHFLY',
+              style: TextStyle(
+                color: _UiPalette.text,
+                letterSpacing: 2.8,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 6),
-        Text(
-          isPlanning ? 'Planning a trip' : 'By the riverside',
+        const SizedBox(height: 10),
+        const Text(
+          'Fly choice for UK river trout',
           style: const TextStyle(
-            fontSize: 40,
-            height: 1.05,
-            color: _UiPalette.text,
-            fontWeight: FontWeight.w700,
+            color: _UiPalette.subhead,
+            fontSize: 17,
+            fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 14),
         const Text(
-          'Fly choice for UK river trout.',
-          style: TextStyle(color: _UiPalette.subhead, fontSize: 16),
+          'Choose your mode to get recommendations.',
+          style: TextStyle(color: _UiPalette.muted, fontSize: 14),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         _buildModeToggle(),
       ],
     );
@@ -586,20 +696,11 @@ class _ByTheRiversidePageState extends State<ByTheRiversidePage> {
                   child: LinearProgressIndicator(minHeight: 3),
                 ),
               if (_riverOptions.isNotEmpty)
-                DropdownButtonFormField<RiverOption>(
-                  key: const ValueKey<String>('manualRiverDropdown'),
-                  initialValue: _manualSelection,
-                  isExpanded: true,
-                  decoration: const InputDecoration(labelText: 'Select river'),
-                  items: _riverOptions
-                      .map(
-                        (option) => DropdownMenuItem<RiverOption>(
-                          value: option,
-                          child: Text(option.label),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (value) {
+                _buildRiverSearchField(
+                  fieldKey: const ValueKey<String>('manualRiverSearchField'),
+                  controller: _manualRiverController,
+                  selectedOption: _manualSelection,
+                  onSelectionChanged: (value) {
                     setState(() {
                       _manualSelection = value;
                     });
@@ -686,20 +787,11 @@ class _ByTheRiversidePageState extends State<ByTheRiversidePage> {
             const Text('River'),
             const SizedBox(height: 6),
             if (_riverOptions.isNotEmpty)
-              DropdownButtonFormField<RiverOption>(
-                key: const ValueKey<String>('planningRiverDropdown'),
-                initialValue: _planningSelection,
-                isExpanded: true,
-                decoration: const InputDecoration(labelText: 'Select river'),
-                items: _riverOptions
-                    .map(
-                      (option) => DropdownMenuItem<RiverOption>(
-                        value: option,
-                        child: Text(option.label),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (value) {
+              _buildRiverSearchField(
+                fieldKey: const ValueKey<String>('planningRiverSearchField'),
+                controller: _planningRiverController,
+                selectedOption: _planningSelection,
+                onSelectionChanged: (value) {
                   setState(() {
                     _planningSelection = value;
                   });
