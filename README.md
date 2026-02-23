@@ -64,6 +64,7 @@ If it cannot be used quickly at the river, it does not belong in the MVP.
 - `DAYLIGHT_API_BASE_URL`: Placeholder for daylight API base URL
 - `OPENAI_API_KEY`: OpenAI API key (required for LLM-first recommendations)
 - `OPENAI_MODEL`: OpenAI model name (default `gpt-4o-mini`)
+- `OPENAI_TIMEOUT_MS`: Timeout for OpenAI responses in milliseconds (default `15000`, minimum `1000`)
 - `ALLOWLIST_ENFORCEMENT`: Set to `true` to enforce fly allowlist validation (default `false`)
 - `FEEDBACK_STORE_PATH`: Path to append feedback events (JSONL). If unset, feedback is not stored.
 - `FEEDBACK_SUMMARY_PATH`: Path to read feedback summaries (default `data/feedback_summaries/latest.json`)
@@ -89,6 +90,12 @@ Prerequisites:
 Required GitHub secrets:
 - `GCP_PROJECT_ID`
 - `GCP_SA_KEY` (service account JSON with permissions to deploy Cloud Run and Firebase Hosting)
+- `OPENAI_API_KEY` (injected into Cloud Run runtime env on deploy)
+
+Recommended GitHub repository variables (`Settings -> Secrets and variables -> Actions -> Variables`):
+- `OPENAI_MODEL` (default `gpt-4o-mini`)
+- `OPENAI_TIMEOUT_MS` (default `15000`)
+- `ALLOWLIST_ENFORCEMENT` (`true` or `false`, default `false`)
 
 Additional secrets for iOS TestFlight workflow:
 - `IOS_CERTIFICATE_P12_BASE64`
@@ -103,7 +110,7 @@ Cloud Run settings:
 - TODO: Confirm `whichfly-api` and `europe-west1` before the first deploy.
 
 Runtime env vars:
-- Configure `OPENAI_API_KEY`, `OPENAI_MODEL`, and related settings in Cloud Run service env vars.
+- Configure `OPENAI_API_KEY`, `OPENAI_MODEL`, `OPENAI_TIMEOUT_MS`, and related settings in Cloud Run service env vars.
 
 ---
 

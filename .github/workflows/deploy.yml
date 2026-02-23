@@ -12,6 +12,10 @@ jobs:
       GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
       CLOUD_RUN_SERVICE: whichfly-api
       CLOUD_RUN_REGION: europe-west1
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-4o-mini' }}
+      OPENAI_TIMEOUT_MS: ${{ vars.OPENAI_TIMEOUT_MS || '15000' }}
+      ALLOWLIST_ENFORCEMENT: ${{ vars.ALLOWLIST_ENFORCEMENT || 'false' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,14 +36,38 @@ jobs:
           # Use same-origin API calls via Firebase Hosting rewrite (/api/** -> Cloud Run)
           # so both *.web.app and *.firebaseapp.com domains work without CORS issues.
           flutter build web --release --dart-define=API_BASE_URL=/
+      - name: Validate runtime env vars
+        run: |
+          if [ -z "${OPENAI_API_KEY}" ]; then
+            echo "OPENAI_API_KEY secret is required for LLM-first production behavior."
+            exit 1
+          fi
+          if ! [[ "${OPENAI_TIMEOUT_MS}" =~ ^[0-9]+$ ]] || [ "${OPENAI_TIMEOUT_MS}" -lt 1000 ]; then
+            echo "OPENAI_TIMEOUT_MS must be an integer >= 1000."
+            exit 1
+          fi
       - name: Deploy Cloud Run API
         run: |
           gcloud run deploy "${CLOUD_RUN_SERVICE}" \
             --source . \
             --region "${CLOUD_RUN_REGION}" \
             --project "${GCP_PROJECT_ID}" \
+            --update-env-vars "OPENAI_API_KEY=${OPENAI_API_KEY},OPENAI_MODEL=${OPENAI_MODEL},OPENAI_TIMEOUT_MS=${OPENAI_TIMEOUT_MS},ALLOWLIST_ENFORCEMENT=${ALLOWLIST_ENFORCEMENT}" \
             --allow-unauthenticated \
             --quiet
+      - name: Verify Cloud Run env vars
+        run: |
+          gcloud run services describe "${CLOUD_RUN_SERVICE}" \
+            --region "${CLOUD_RUN_REGION}" \
+            --project "${GCP_PROJECT_ID}" \
+            --format=yaml > /tmp/whichfly_service.yaml
+
+          for required_var in OPENAI_API_KEY OPENAI_MODEL OPENAI_TIMEOUT_MS ALLOWLIST_ENFORCEMENT; do
+            if ! grep -q "name: ${required_var}" /tmp/whichfly_service.yaml; then
+              echo "Missing Cloud Run env var: ${required_var}"
+              exit 1
+            fi
+          done
       - name: Deploy Firebase Hosting
         run: |
           npm install -g firebase-tools
